@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log Viewer Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include Select2 CSS -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <!-- SheetJS Library for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+  </head>
+  <body class="bg-gray-50 font-sans">
+    <div class="container mx-auto px-6 py-8">
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800">Log Viewer Dashboard</h1>
+      </header>
+
+      <!-- Log File Selector -->
+      <div class="mb-6 flex justify-center gap-4 flex-wrap">
+        <div class="w-full sm:w-auto">
+          <label
+            for="logFileSelect"
+            class="block text-lg font-medium text-gray-700"
+            >Select Log File:</label
+          >
+          <select
+            id="logFileSelect"
+            class="mt-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm w-64"
+          >
+            <option value="">Select a log file</option>
+            <!-- Log files will be dynamically loaded here -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="mb-6 flex justify-center gap-6 flex-wrap">
+        <div class="w-full sm:w-auto">
+          <label
+            for="methodFilter"
+            class="block text-lg font-medium text-gray-700"
+            >Method:</label
+          >
+          <select
+            id="methodFilter"
+            class="mt-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm w-64"
+          >
+            <option value="">All Methods</option>
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="DELETE">DELETE</option>
+          </select>
+        </div>
+
+        <div class="w-full sm:w-auto">
+          <label
+            for="statusFilter"
+            class="block text-lg font-medium text-gray-700"
+            >Status Code:</label
+          >
+          <select
+            id="statusFilter"
+            class="mt-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm w-64"
+          >
+            <option value="">All Status Codes</option>
+            <option value="200">200</option>
+            <option value="400">400</option>
+            <option value="404">404</option>
+            <option value="500">500</option>
+          </select>
+        </div>
+
+        <div class="w-full sm:w-auto">
+          <label
+            for="pathFilter"
+            class="block text-lg font-medium text-gray-700"
+            >Path:</label
+          >
+          <input
+            type="text"
+            id="pathFilter"
+            class="mt-2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm w-64"
+            placeholder="Filter by path"
+          />
+        </div>
+      </div>
+
+      <!-- Export to Excel Button -->
+      <div class="mb-6 flex justify-center">
+        <button
+          id="exportButton"
+          class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 hidden"
+        >
+          Export to Excel
+        </button>
+      </div>
+
+      <!-- Log Table -->
+      <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+        <table id="logTable" class="min-w-full">
+          <thead class="bg-gray-200">
+            <tr class="text-left text-sm text-gray-600">
+              <th class="px-6 py-4">Timestamp</th>
+              <th class="px-6 py-4">Status Code</th>
+              <th class="px-6 py-4">Latency</th>
+              <th class="px-6 py-4">IP</th>
+              <th class="px-6 py-4">Method</th>
+              <th class="px-6 py-4">Path</th>
+              <th class="px-6 py-4">Additional Info</th>
+            </tr>
+          </thead>
+          <tbody id="logList">
+            <!-- Logs will be dynamically loaded here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="flex justify-center mt-4">
+        <button
+          id="prevPage"
+          class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+        >
+          Previous
+        </button>
+        <span id="pageNumber" class="mx-4 text-lg text-gray-700">Page 1</span>
+        <button
+          id="nextPage"
+          class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Include Select2 JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+      // Initialize Select2 on the log file select after the document is loaded
+      document.addEventListener("DOMContentLoaded", function () {
+        // Wait for the options to be added, then apply select2
+        const logFileSelect = document.getElementById("logFileSelect");
+        $(logFileSelect).select2({
+          placeholder: "Search for a log file",
+          allowClear: true, // Optional: To allow clearing the selection
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+name: Whatsapp Auto Message BE CI/CD
+
+on:
+  push:
+    branches:
+      - master # Trigger on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Debug SSH Connection with Temporary Key File
+      # - name: Debug SSH Connection
+      #   run: |
+      #     echo "${{ secrets.VPS_SSH_KEY }}" > ssh_key
+      #     chmod 600 ssh_key
+      #     ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "echo Connected!"
+      #   shell: bash
+
+      # 3. Whatsapp Auto Message BE CI/CD
+      - name: Whatsapp Auto Message BE CI/CD
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            set -e  # Exit immediately if a command exits with a non-zero status
+            cd /usr/go/whatsapp_auto_message_be
+            git pull origin master
+            go mod tidy
+            go build -o whatsapp_auto_message_be
+            pm2 restart whatsapp_auto_message_be
+
+      # 4. Send success notification via custom API
+      - name: Send Telegram Notification
+        if: success()
+        run: |
+          curl -s -X POST https://telebot.apicollection.my.id/api/v1/notification/send-message \
+          -H "Content-Type: application/json" \
+           -d '{"message": "✅ Task Succeeded\n${{ github.event.head_commit.message }}\nWhatsapp Auto Message BE Deployed to Production\nBy: ${{ github.event.head_commit.committer.name }}", "channel": "@whatsappautotools"}'
+      # 5. Cleanup
+      - name: Remove SSH Key
+        if: always()
+        run: rm -f ssh_key
