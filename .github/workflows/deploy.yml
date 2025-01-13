@@ -36,8 +36,8 @@ jobs:
             git pull origin master
             go mod tidy
             go mod vendor
-            go build -o whatsapp_auto_message_be
-            pm2 restart whatsapp_auto_message_be
+            go build -o go_whatsapp
+            pm2 restart go_whatsapp
 
       # 4. Send success notification via custom API
       - name: Send Telegram Notification
