@@ -224,24 +224,6 @@ func (h *BroadcastHandler) ImportPecatuRecipient(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(response)
 }
 
-func (h *BroadcastHandler) StartBroadcast(c *fiber.Ctx) error {
-	ctx := context.Background()
-	broadcastID, err := strconv.Atoi(c.Query("broadcast_id"))
-	if err != nil {
-		response := helper.APIResponse("Invalid broadcast id", http.StatusBadRequest, "ERROR", nil)
-		return c.Status(http.StatusBadRequest).JSON(response)
-	}
-
-	_, err = h.service.StartBroadcast(ctx, broadcastID)
-	if err != nil {
-		response := helper.APIResponse("Failed to start broadcast", http.StatusInternalServerError, "ERROR", nil)
-		return c.Status(http.StatusInternalServerError).JSON(response)
-	}
-
-	response := helper.APIResponse("Broadcast started successfully", http.StatusOK, "OK", nil)
-	return c.Status(http.StatusOK).JSON(response)
-}
-
 func generateBroadcastCode() string {
 	chars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	broadcastCode := make([]byte, 6)
@@ -288,9 +270,22 @@ func (h *BroadcastHandler) HandleSendBroadcast(c *fiber.Ctx) error {
 	// Get the broadcast ID from the payload
 	broadcastID := payload.BroadcastID
 
-	// Update broadcast status to "Starting"
+	// Check if there are any recipients in the broadcast
 	ctx := context.Background()
-	_, err := h.service.UpdateBroadcastStatus(ctx, broadcastID, "Starting")
+	hasRecipients, err := h.service.IsAnyRecipientInBroadcast(ctx, broadcastID)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Failed to check recipients",
+		})
+	}
+	if !hasRecipients {
+		return c.Status(200).JSON(fiber.Map{
+			"message": "No recipients to send broadcast",
+		})
+	}
+
+	// Update broadcast status to "Starting"
+	_, err = h.service.UpdateBroadcastStatus(ctx, broadcastID, "Starting")
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Failed to update broadcast status",
@@ -423,9 +418,22 @@ func (h *BroadcastHandler) HandlePecatuBroadcast(c *fiber.Ctx) error {
 	// Get the broadcast ID from the payload
 	broadcastID := payload.BroadcastID
 
-	// Update broadcast status to "Starting"
+	// Check if there are any recipients in the broadcast
 	ctx := context.Background()
-	_, err := h.service.UpdateBroadcastStatus(ctx, broadcastID, "Starting")
+	hasRecipients, err := h.service.IsAnyRecipientInBroadcast(ctx, broadcastID)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Failed to check recipients",
+		})
+	}
+	if !hasRecipients {
+		return c.Status(200).JSON(fiber.Map{
+			"message": "No recipients to send broadcast",
+		})
+	}
+
+	// Update broadcast status to "Starting"
+	_, err = h.service.UpdateBroadcastStatus(ctx, broadcastID, "Starting")
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
 			"error": "Failed to update broadcast status",
@@ -474,13 +482,13 @@ func (h *BroadcastHandler) HandlePecatuBroadcast(c *fiber.Ctx) error {
 
 			recipientName, ok := recipient["recipient_name"].(string)
 			if !ok {
-				ch <- fmt.Errorf("Recipient Name is not a string")
+				ch <- fmt.Errorf("recipient name is not a string")
 				return
 			}
 
 			recipientIdentifier, ok := recipient["recipient_unique_identifier"].(string)
 			if !ok {
-				ch <- fmt.Errorf("Identifier is not a string")
+				ch <- fmt.Errorf("identifier is not a string")
 				return
 			}
 

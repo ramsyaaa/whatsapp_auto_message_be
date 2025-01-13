@@ -89,15 +89,6 @@ func (r *broadcastRepository) ImportPecatuRecipient(ctx context.Context, broadca
 	return map[string]interface{}{"success": true}, nil
 }
 
-func (r *broadcastRepository) StartBroadcast(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
-	err := r.db.WithContext(ctx).Model(&models.BroadcastJob{}).Where("id = ?", broadcastID).Update("broadcast_job_status", "Starting").Error
-	if err != nil {
-		return nil, err
-	}
-	return nil, nil
-
-}
-
 func (r *broadcastRepository) BroadcastDetail(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
 	var broadcast models.BroadcastJob
 	err := r.db.WithContext(ctx).Where("id = ?", broadcastID).First(&broadcast).Error
@@ -188,4 +179,13 @@ func (r *broadcastRepository) UpdateRecipientBroadcastStatus(ctx context.Context
 	return map[string]interface{}{
 		"message": "Recipient broadcast status updated successfully",
 	}, nil
+}
+
+func (r *broadcastRepository) IsAnyRecipientInBroadcast(ctx context.Context, broadcastID int) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&models.BroadcastRecipient{}).Where("broadcast_job_id = ?", broadcastID).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

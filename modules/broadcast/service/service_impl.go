@@ -26,10 +26,6 @@ func (s *service) ImportPecatuRecipient(ctx context.Context, broadcastID int, da
 	return s.repo.ImportPecatuRecipient(ctx, broadcastID, data)
 }
 
-func (s *service) StartBroadcast(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
-	return s.repo.StartBroadcast(ctx, broadcastID)
-}
-
 func (s *service) BroadcastDetail(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
 	return s.repo.BroadcastDetail(ctx, broadcastID)
 }
@@ -48,4 +44,7 @@ func (s *service) UpdateBroadcastStatus(ctx context.Context, broadcastID int, st
 
 func (s *service) UpdateRecipientBroadcastStatus(ctx context.Context, broadcastID int, recipientID int, status string) (map[string]interface{}, error) {
 	return s.repo.UpdateRecipientBroadcastStatus(ctx, broadcastID, recipientID, status)
+}
+func (s *service) IsAnyRecipientInBroadcast(ctx context.Context, broadcastID int) (bool, error) {
+	return s.repo.IsAnyRecipientInBroadcast(ctx, broadcastID)
 }
