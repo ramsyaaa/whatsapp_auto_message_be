@@ -35,6 +35,7 @@ jobs:
             cd /usr/go/whatsapp_auto_message_be
             git pull origin master
             go mod tidy
+            go mod vendor
             go build -o whatsapp_auto_message_be
             pm2 restart whatsapp_auto_message_be
 

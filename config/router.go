@@ -45,6 +45,7 @@ func Route(db *gorm.DB, client *whatsmeow.Client) {
 	// Set up your routes
 	routes.AuthRouter(api, client)
 	routes.MessagingRouter(api, client)
+	routes.BroadcastRouter(api, db, client)
 
 	// Mount the "api/v1" group under the main app
 	app.Mount("/api/v1", api)
