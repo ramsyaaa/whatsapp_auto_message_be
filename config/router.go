@@ -25,6 +25,11 @@ func Route(db *gorm.DB, client *whatsmeow.Client) {
 
 	app.Static("/static", "./static")
 
+	// Redirect base URL to login page
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.Redirect("/admin")
+	})
+
 	// Serve admin pages
 	app.Get("/admin", func(c *fiber.Ctx) error {
 		return c.SendFile("./static/admin/index.html")

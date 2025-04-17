@@ -272,7 +272,28 @@ func (h *BroadcastHandler) GetAllRecipientByBroadcastID(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(response)
 	}
 
-	recipients, err := h.service.GetAllRecipientByBroadcastID(ctx, broadcastID)
+	// Get pagination parameters
+	page, err := strconv.Atoi(c.Query("page", "1"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(c.Query("limit", "10"))
+	if err != nil || limit < 1 || limit > 100 {
+		limit = 10
+	}
+
+	// Get search parameter
+	search := c.Query("search", "")
+
+	// Use paginated method if pagination parameters are provided
+	var recipients map[string]interface{}
+	if page > 1 || limit != 10 || search != "" {
+		recipients, err = h.service.GetPaginatedRecipientsByBroadcastID(ctx, broadcastID, page, limit, search)
+	} else {
+		recipients, err = h.service.GetAllRecipientByBroadcastID(ctx, broadcastID)
+	}
+
 	if err != nil {
 		response := helper.APIResponse("Failed to get recipients", http.StatusInternalServerError, "ERROR", nil)
 		return c.Status(http.StatusInternalServerError).JSON(response)

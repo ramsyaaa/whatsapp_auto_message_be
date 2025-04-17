@@ -176,6 +176,60 @@ func (r *broadcastRepository) GetPendingRecipientsByBroadcastID(ctx context.Cont
 	}, nil
 }
 
+func (r *broadcastRepository) GetPaginatedRecipientsByBroadcastID(ctx context.Context, broadcastID int, page int, limit int, search string) (map[string]interface{}, error) {
+	var recipients []models.BroadcastRecipient
+	var totalCount int64
+
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	// Create base query
+	query := r.db.WithContext(ctx).Model(&models.BroadcastRecipient{}).Where("broadcast_job_id = ?", broadcastID)
+
+	// Add search condition if search string is provided
+	if search != "" {
+		searchTerm := "%" + search + "%"
+		query = query.Where("(whatsapp_number LIKE ? OR recipient_name LIKE ?)", searchTerm, searchTerm)
+	}
+
+	// Get total count for pagination
+	query.Count(&totalCount)
+
+	// Get paginated results
+	err := query.Offset(offset).Limit(limit).Find(&recipients).Error
+	if err != nil {
+		return nil, err
+	}
+
+	recipientMaps := make([]map[string]interface{}, len(recipients))
+	for i, recipient := range recipients {
+		recipientMaps[i] = map[string]interface{}{
+			"id":                          int(recipient.ID),
+			"recipient_name":              recipient.RecipientName,
+			"recipient_unique_identifier": recipient.RecipientUniqueIdentifier,
+			"broadcast_status":            recipient.BroadcastStatus,
+			"broadcast_at":                recipient.BroadcastedAt,
+			"whatsapp_number":             recipient.WhatsappNumber,
+		}
+	}
+
+	// Calculate total pages
+	totalPages := (int(totalCount) + limit - 1) / limit
+	if totalPages < 1 {
+		totalPages = 1
+	}
+
+	return map[string]interface{}{
+		"recipients": recipientMaps,
+		"pagination": map[string]interface{}{
+			"total_count":  totalCount,
+			"total_pages":  totalPages,
+			"current_page": page,
+			"limit":        limit,
+		},
+	}, nil
+}
+
 func (r *broadcastRepository) UpdateBroadcastStatus(ctx context.Context, broadcastID int, status string) (map[string]interface{}, error) {
 	var broadcast models.BroadcastJob
 	err := r.db.WithContext(ctx).Where("id = ?", broadcastID).First(&broadcast).Error

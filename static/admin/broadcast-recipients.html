@@ -147,15 +147,35 @@
               <h3 class="text-lg leading-6 font-medium text-gray-900">
                 Recipients
               </h3>
-              <div id="action-messages" class="flex-grow mx-4">
-                <div
-                  id="error-message"
-                  class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded"
-                ></div>
-                <div
-                  id="success-message"
-                  class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded"
-                ></div>
+              <div class="flex-grow mx-4">
+                <!-- Search Box -->
+                <div class="mb-4">
+                  <div class="relative">
+                    <input
+                      type="text"
+                      id="search-input"
+                      placeholder="Search by name or number..."
+                      class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      id="search-button"
+                      class="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+                    >
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <!-- Action Messages -->
+                <div id="action-messages">
+                  <div
+                    id="error-message"
+                    class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded"
+                  ></div>
+                  <div
+                    id="success-message"
+                    class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded"
+                  ></div>
+                </div>
               </div>
             </div>
             <div class="border-t border-gray-200">
@@ -170,11 +190,10 @@
                         Number
                       </th>
                       <th
-                        id="name-header"
                         scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Name
+                        Recipient Name
                       </th>
                       <th
                         id="identifier-header"
@@ -209,7 +228,7 @@
                   >
                     <tr>
                       <td
-                        colspan="5"
+                        colspan="6"
                         class="px-6 py-4 text-center text-sm text-gray-500"
                       >
                         Loading recipients...
@@ -217,6 +236,67 @@
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              <!-- Pagination Controls -->
+              <div
+                id="pagination-controls"
+                class="px-6 py-4 flex items-center justify-between border-t border-gray-200"
+              >
+                <div class="flex-1 flex justify-between sm:hidden">
+                  <button
+                    id="mobile-prev-page"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    id="mobile-next-page"
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div
+                  class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p id="pagination-info" class="text-sm text-gray-700">
+                      Showing
+                      <span class="font-medium" id="pagination-start">1</span>
+                      to
+                      <span class="font-medium" id="pagination-end">10</span> of
+                      <span class="font-medium" id="pagination-total">0</span>
+                      results
+                    </p>
+                  </div>
+                  <div>
+                    <nav
+                      class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                      aria-label="Pagination"
+                    >
+                      <button
+                        id="prev-page"
+                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      >
+                        <span class="sr-only">Previous</span>
+                        <i class="fas fa-chevron-left"></i>
+                      </button>
+                      <div
+                        id="page-numbers"
+                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                      >
+                        <!-- Page numbers will be inserted here -->
+                      </div>
+                      <button
+                        id="next-page"
+                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      >
+                        <span class="sr-only">Next</span>
+                        <i class="fas fa-chevron-right"></i>
+                      </button>
+                    </nav>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -258,9 +338,64 @@
           return;
         }
 
+        // Set up search functionality
+        const searchInput = document.getElementById("search-input");
+        const searchButton = document.getElementById("search-button");
+
+        searchButton.addEventListener("click", function () {
+          currentSearch = searchInput.value.trim();
+          currentPage = 1; // Reset to first page when searching
+          loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
+        });
+
+        searchInput.addEventListener("keyup", function (event) {
+          if (event.key === "Enter") {
+            currentSearch = searchInput.value.trim();
+            currentPage = 1; // Reset to first page when searching
+            loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
+          }
+        });
+
+        // Set up pagination controls
+        document
+          .getElementById("prev-page")
+          .addEventListener("click", function () {
+            if (currentPage > 1) {
+              currentPage--;
+              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
+            }
+          });
+
+        document
+          .getElementById("next-page")
+          .addEventListener("click", function () {
+            if (currentPage < totalPages) {
+              currentPage++;
+              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
+            }
+          });
+
+        document
+          .getElementById("mobile-prev-page")
+          .addEventListener("click", function () {
+            if (currentPage > 1) {
+              currentPage--;
+              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
+            }
+          });
+
+        document
+          .getElementById("mobile-next-page")
+          .addEventListener("click", function () {
+            if (currentPage < totalPages) {
+              currentPage++;
+              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
+            }
+          });
+
         // Load broadcast details and recipients
         await loadBroadcastDetails(broadcastId);
-        await loadRecipients(broadcastId);
+        await loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
 
         // Set up event listeners for send buttons
         document
@@ -358,24 +493,47 @@
         }
       }
 
-      // Load recipients
-      async function loadRecipients(broadcastId) {
+      // Global variables for pagination
+      let currentPage = 1;
+      let pageSize = 10;
+      let totalPages = 1;
+      let currentSearch = "";
+
+      // Load recipients with pagination and search
+      async function loadRecipients(
+        broadcastId,
+        page = 1,
+        limit = 10,
+        search = ""
+      ) {
         const recipientsList = document.getElementById("recipients-list");
-        const nameHeader = document.getElementById("name-header");
+        // We no longer need nameHeader since it's always visible
         const identifierHeader = document.getElementById("identifier-header");
+        const paginationControls = document.getElementById(
+          "pagination-controls"
+        );
+
+        // Update current page
+        currentPage = page;
+        pageSize = limit;
+        currentSearch = search;
 
         try {
           console.log("Loading recipients with token:", token);
+          console.log("Page:", page, "Limit:", limit, "Search:", search);
+
+          // Build URL with query parameters
+          let url = `/api/v1/broadcast/recipients/${broadcastId}?page=${page}&limit=${limit}`;
+          if (search) {
+            url += `&search=${encodeURIComponent(search)}`;
+          }
 
           // Fetch recipients from API
-          const response = await fetch(
-            `/api/v1/broadcast/recipients/${broadcastId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          const response = await fetch(url, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
           console.log("Recipients response status:", response.status);
 
@@ -389,6 +547,20 @@
           // Get recipients from response data
           const recipients = data.data?.recipients || [];
 
+          // Get pagination data if available
+          const pagination = data.data?.pagination || {
+            total_count: recipients.length,
+            total_pages: 1,
+            current_page: 1,
+            limit: 10,
+          };
+
+          // Update pagination variables
+          totalPages = pagination.total_pages;
+
+          // Update pagination UI
+          updatePaginationUI(pagination);
+
           // Determine broadcast type based on recipients if not already set
           if (!window.broadcastType) {
             window.broadcastType = "regular";
@@ -401,17 +573,17 @@
           }
 
           // Show/hide Pecatu-specific columns based on broadcast type
-          if (window.broadcastType === "pecatu") {
-            nameHeader.classList.remove("hidden");
+          if (window.broadcastType === "pecatu" && identifierHeader) {
+            // Only toggle the identifier header since name is always shown
             identifierHeader.classList.remove("hidden");
-          } else {
-            nameHeader.classList.add("hidden");
+          } else if (identifierHeader) {
             identifierHeader.classList.add("hidden");
           }
 
           // Update recipients table
           if (recipients.length === 0) {
-            const colSpan = window.broadcastType === "pecatu" ? 5 : 3;
+            // Calculate colspan: Number + Name + Status + Sent At + Action + (Identifier if pecatu)
+            const colSpan = window.broadcastType === "pecatu" ? 6 : 5;
             recipientsList.innerHTML = `<tr><td colspan="${colSpan}" class="px-6 py-4 text-center text-sm text-gray-500">No recipients found</td></tr>`;
           } else {
             recipientsList.innerHTML = "";
@@ -432,14 +604,14 @@
               let rowHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${recipient.whatsapp_number}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${recipient.recipient_name || "-"}
                 </td>`;
 
               // Add Pecatu-specific columns if this is a Pecatu broadcast
               if (window.broadcastType === "pecatu") {
                 rowHTML += `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${recipient.recipient_name || "-"}
-                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     ${recipient.recipient_unique_identifier || "-"}
                 </td>`;
@@ -504,7 +676,8 @@
           }
         } catch (error) {
           console.error("Error loading recipients:", error);
-          const errorColSpan = 5;
+          // Calculate colspan: Number + Name + Status + Sent At + Action + (Identifier if pecatu)
+          const errorColSpan = window.broadcastType === "pecatu" ? 6 : 5;
           recipientsList.innerHTML = `<tr><td colspan="${errorColSpan}" class="px-6 py-4 text-center text-sm text-gray-500">Error loading recipients: ${error.message}</td></tr>`;
         }
       }
@@ -616,6 +789,72 @@
 
           button.innerHTML = originalText;
           button.disabled = false;
+        }
+      }
+
+      // Update pagination UI
+      function updatePaginationUI(pagination) {
+        const paginationInfo = document.getElementById("pagination-info");
+        const paginationStart = document.getElementById("pagination-start");
+        const paginationEnd = document.getElementById("pagination-end");
+        const paginationTotal = document.getElementById("pagination-total");
+        const pageNumbers = document.getElementById("page-numbers");
+        const prevPageBtn = document.getElementById("prev-page");
+        const nextPageBtn = document.getElementById("next-page");
+        const mobilePrevPageBtn = document.getElementById("mobile-prev-page");
+        const mobileNextPageBtn = document.getElementById("mobile-next-page");
+
+        // Update pagination info
+        const start = (pagination.current_page - 1) * pagination.limit + 1;
+        const end = Math.min(
+          start + pagination.limit - 1,
+          pagination.total_count
+        );
+
+        paginationStart.textContent = pagination.total_count > 0 ? start : 0;
+        paginationEnd.textContent = end;
+        paginationTotal.textContent = pagination.total_count;
+
+        // Update page numbers
+        pageNumbers.innerHTML = `Page ${pagination.current_page} of ${pagination.total_pages}`;
+
+        // Update prev/next buttons
+        prevPageBtn.disabled = pagination.current_page <= 1;
+        nextPageBtn.disabled =
+          pagination.current_page >= pagination.total_pages;
+        mobilePrevPageBtn.disabled = pagination.current_page <= 1;
+        mobileNextPageBtn.disabled =
+          pagination.current_page >= pagination.total_pages;
+
+        // Add visual indication for disabled buttons
+        if (prevPageBtn.disabled) {
+          prevPageBtn.classList.add("opacity-50", "cursor-not-allowed");
+        } else {
+          prevPageBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+
+        if (nextPageBtn.disabled) {
+          nextPageBtn.classList.add("opacity-50", "cursor-not-allowed");
+        } else {
+          nextPageBtn.classList.remove("opacity-50", "cursor-not-allowed");
+        }
+
+        if (mobilePrevPageBtn.disabled) {
+          mobilePrevPageBtn.classList.add("opacity-50", "cursor-not-allowed");
+        } else {
+          mobilePrevPageBtn.classList.remove(
+            "opacity-50",
+            "cursor-not-allowed"
+          );
+        }
+
+        if (mobileNextPageBtn.disabled) {
+          mobileNextPageBtn.classList.add("opacity-50", "cursor-not-allowed");
+        } else {
+          mobileNextPageBtn.classList.remove(
+            "opacity-50",
+            "cursor-not-allowed"
+          );
         }
       }
 

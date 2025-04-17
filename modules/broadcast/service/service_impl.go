@@ -42,6 +42,10 @@ func (s *service) GetPendingRecipientsByBroadcastID(ctx context.Context, broadca
 	return s.repo.GetPendingRecipientsByBroadcastID(ctx, broadcastID)
 }
 
+func (s *service) GetPaginatedRecipientsByBroadcastID(ctx context.Context, broadcastID int, page int, limit int, search string) (map[string]interface{}, error) {
+	return s.repo.GetPaginatedRecipientsByBroadcastID(ctx, broadcastID, page, limit, search)
+}
+
 func (s *service) UpdateBroadcastStatus(ctx context.Context, broadcastID int, status string) (map[string]interface{}, error) {
 	return s.repo.UpdateBroadcastStatus(ctx, broadcastID, status)
 }

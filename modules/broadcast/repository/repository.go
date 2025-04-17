@@ -12,6 +12,7 @@ type BroadcastRepository interface {
 	GetBroadcastMessage(ctx context.Context, broadcastID int) (map[string]interface{}, error)
 	GetAllRecipientByBroadcastID(ctx context.Context, broadcastID int) (map[string]interface{}, error)
 	GetPendingRecipientsByBroadcastID(ctx context.Context, broadcastID int) (map[string]interface{}, error)
+	GetPaginatedRecipientsByBroadcastID(ctx context.Context, broadcastID int, page int, limit int, search string) (map[string]interface{}, error)
 	UpdateBroadcastStatus(ctx context.Context, broadcastID int, status string) (map[string]interface{}, error)
 	UpdateRecipientBroadcastStatus(ctx context.Context, recipientID int, broadcastID int, status string) (map[string]interface{}, error)
 	IsAnyRecipientInBroadcast(ctx context.Context, broadcastID int) (bool, error)
