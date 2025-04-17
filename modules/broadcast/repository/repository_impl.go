@@ -32,8 +32,14 @@ func (r *broadcastRepository) CreateBroadcast(ctx context.Context, data map[stri
 }
 
 func parseTime(value string) time.Time {
-	parsedTime, _ := time.Parse(time.RFC3339, value) // Menangani error sesuai kebutuhan
-	return parsedTime.UTC()
+	// Use Asia/Jakarta timezone
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		// Fallback to UTC if timezone loading fails
+		loc = time.UTC
+	}
+	parsedTime, _ := time.Parse(time.RFC3339, value) // Handle error as needed
+	return parsedTime.In(loc)
 }
 
 func (r *broadcastRepository) ImportRecipient(ctx context.Context, broadcastID int, data []map[string]interface{}) (map[string]interface{}, error) {
@@ -135,6 +141,32 @@ func (r *broadcastRepository) GetAllRecipientByBroadcastID(ctx context.Context, 
 			"id":                          int(recipient.ID),
 			"recipient_name":              recipient.RecipientName,
 			"recipient_unique_identifier": recipient.RecipientUniqueIdentifier,
+			"broadcast_status":            recipient.BroadcastStatus,
+			"broadcast_at":                recipient.BroadcastedAt,
+			"whatsapp_number":             recipient.WhatsappNumber,
+		}
+	}
+
+	return map[string]interface{}{
+		"recipients": recipientMaps,
+	}, nil
+}
+
+func (r *broadcastRepository) GetPendingRecipientsByBroadcastID(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
+	var recipients []models.BroadcastRecipient
+	err := r.db.WithContext(ctx).Where("broadcast_job_id = ? AND broadcast_status = ?", broadcastID, "Pending").Find(&recipients).Error
+	if err != nil {
+		return nil, err
+	}
+
+	recipientMaps := make([]map[string]interface{}, len(recipients))
+	for i, recipient := range recipients {
+		recipientMaps[i] = map[string]interface{}{
+			"id":                          int(recipient.ID),
+			"recipient_name":              recipient.RecipientName,
+			"recipient_unique_identifier": recipient.RecipientUniqueIdentifier,
+			"broadcast_status":            recipient.BroadcastStatus,
+			"broadcast_at":                recipient.BroadcastedAt,
 			"whatsapp_number":             recipient.WhatsappNumber,
 		}
 	}
@@ -169,8 +201,16 @@ func (r *broadcastRepository) UpdateRecipientBroadcastStatus(ctx context.Context
 		return nil, err
 	}
 
+	// Use Asia/Jakarta timezone
+	loc, err := time.LoadLocation("Asia/Jakarta")
+	if err != nil {
+		// Fallback to UTC if timezone loading fails
+		loc = time.UTC
+	}
+	now := time.Now().In(loc)
+
 	recipient.BroadcastStatus = status
-	recipient.BroadcastedAt = time.Now() // Set the broadcasted_at using current timestamp
+	recipient.BroadcastedAt = now // Set the broadcasted_at using current timestamp with Jakarta timezone
 	err = r.db.WithContext(ctx).Save(&recipient).Error
 	if err != nil {
 		return nil, err
@@ -188,4 +228,43 @@ func (r *broadcastRepository) IsAnyRecipientInBroadcast(ctx context.Context, bro
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (r *broadcastRepository) GetAllBroadcasts(ctx context.Context) ([]map[string]interface{}, error) {
+	var broadcasts []models.BroadcastJob
+	err := r.db.WithContext(ctx).Order("created_at DESC").Find(&broadcasts).Error
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]map[string]interface{}, len(broadcasts))
+	for i, broadcast := range broadcasts {
+		// Count recipients for this broadcast
+		var recipientCount int64
+		r.db.Model(&models.BroadcastRecipient{}).Where("broadcast_job_id = ?", broadcast.ID).Count(&recipientCount)
+
+		// Check if this broadcast has any Pecatu recipients (with name and identifier)
+		var pecatuCount int64
+		r.db.Model(&models.BroadcastRecipient{}).Where("broadcast_job_id = ? AND recipient_name != '' AND recipient_unique_identifier != ''", broadcast.ID).Count(&pecatuCount)
+
+		// Determine broadcast type based on recipients
+		broadcastType := "regular"
+		if pecatuCount > 0 {
+			broadcastType = "pecatu"
+		}
+
+		result[i] = map[string]interface{}{
+			"id":                   broadcast.ID,
+			"client_info":          broadcast.ClientInfo,
+			"broadcast_plan_at":    broadcast.BroadcastPlanAt,
+			"broadcast_job_status": broadcast.BroadcastJobStatus,
+			"created_at":           broadcast.CreatedAt,
+			"broadcast_code":       broadcast.BroadcastCode,
+			"broadcast_message":    broadcast.BroadcastMessage,
+			"recipient_count":      recipientCount,
+			"broadcast_type":       broadcastType,
+		}
+	}
+
+	return result, nil
 }

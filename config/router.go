@@ -25,6 +25,23 @@ func Route(db *gorm.DB, client *whatsmeow.Client) {
 
 	app.Static("/static", "./static")
 
+	// Serve admin pages
+	app.Get("/admin", func(c *fiber.Ctx) error {
+		return c.SendFile("./static/admin/index.html")
+	})
+	app.Get("/admin/dashboard", func(c *fiber.Ctx) error {
+		return c.SendFile("./static/admin/dashboard.html")
+	})
+	app.Get("/admin/messaging", func(c *fiber.Ctx) error {
+		return c.SendFile("./static/admin/messaging.html")
+	})
+	app.Get("/admin/broadcast", func(c *fiber.Ctx) error {
+		return c.SendFile("./static/admin/broadcast.html")
+	})
+	app.Get("/admin/broadcast/recipients", func(c *fiber.Ctx) error {
+		return c.SendFile("./static/admin/broadcast-recipients.html")
+	})
+
 	// Serve the HTML dashboard on the root path
 	app.Get("/log-viewer", func(c *fiber.Ctx) error {
 		return c.SendFile("./static/index.html")
@@ -44,8 +61,9 @@ func Route(db *gorm.DB, client *whatsmeow.Client) {
 
 	// Set up your routes
 	routes.AuthRouter(api, client)
-	routes.MessagingRouter(api, client)
+	routes.MessagingRouter(api, client, db)
 	routes.BroadcastRouter(api, db, client)
+	routes.AdminRouter(api, db)
 
 	// Mount the "api/v1" group under the main app
 	app.Mount("/api/v1", api)

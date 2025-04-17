@@ -1,0 +1,2708 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Broadcast - WhatsApp Messaging System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="flex h-screen bg-gray-100">
+      <!-- Sidebar -->
+      <div class="hidden md:flex md:flex-shrink-0">
+        <div class="flex flex-col w-64 bg-gray-800">
+          <div class="flex items-center justify-center h-16 bg-gray-900">
+            <span class="text-white font-bold text-lg">WhatsApp Admin</span>
+          </div>
+          <div class="flex flex-col flex-grow overflow-y-auto">
+            <nav class="flex-1 px-2 py-4 space-y-1">
+              <a
+                href="/admin/dashboard"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                Dashboard
+              </a>
+              <a
+                href="/admin/messaging"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-comment mr-3"></i>
+                Messaging
+              </a>
+              <a
+                href="/admin/broadcast"
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md"
+              >
+                <i class="fas fa-bullhorn mr-3"></i>
+                Broadcast
+              </a>
+            </nav>
+          </div>
+          <div class="p-4 bg-gray-700">
+            <button
+              id="logout-btn"
+              class="flex items-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+            >
+              <i class="fas fa-sign-out-alt mr-3"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile sidebar -->
+      <div
+        class="md:hidden fixed inset-0 z-40 flex"
+        id="mobile-sidebar"
+        style="display: none"
+      >
+        <div
+          class="fixed inset-0 bg-gray-600 bg-opacity-75"
+          id="sidebar-backdrop"
+        ></div>
+        <div class="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
+          <div class="absolute top-0 right-0 -mr-12 pt-2">
+            <button
+              id="close-sidebar-btn"
+              class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            >
+              <span class="sr-only">Close sidebar</span>
+              <i class="fas fa-times text-white"></i>
+            </button>
+          </div>
+          <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+            <div class="flex-shrink-0 flex items-center px-4">
+              <span class="text-white font-bold text-lg">WhatsApp Admin</span>
+            </div>
+            <nav class="mt-5 px-2 space-y-1">
+              <a
+                href="/admin/dashboard"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                Dashboard
+              </a>
+              <a
+                href="/admin/messaging"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-comment mr-3"></i>
+                Messaging
+              </a>
+              <a
+                href="/admin/broadcast"
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md"
+              >
+                <i class="fas fa-bullhorn mr-3"></i>
+                Broadcast
+              </a>
+            </nav>
+          </div>
+          <div class="p-4 bg-gray-700">
+            <button
+              id="mobile-logout-btn"
+              class="flex items-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+            >
+              <i class="fas fa-sign-out-alt mr-3"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+        <div class="flex-shrink-0 w-14"></div>
+      </div>
+
+      <!-- Main content -->
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <!-- Top navbar -->
+        <div
+          class="flex items-center justify-between h-16 bg-white shadow-sm px-6"
+        >
+          <button
+            id="open-sidebar-btn"
+            class="md:hidden text-gray-500 focus:outline-none"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="flex items-center">
+            <span id="user-name" class="text-sm font-medium text-gray-700 mr-2"
+              >Admin User</span
+            >
+            <div
+              class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center"
+            >
+              <i class="fas fa-user text-gray-600"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main content area -->
+        <main class="flex-1 overflow-y-auto p-6">
+          <div class="mb-6">
+            <h1 class="text-2xl font-semibold text-gray-900">
+              Broadcast Management
+            </h1>
+            <p class="text-gray-600">
+              Create and manage broadcast messages to multiple recipients
+            </p>
+          </div>
+
+          <!-- Tabs -->
+          <div class="mb-6">
+            <div class="border-b border-gray-200">
+              <nav class="-mb-px flex space-x-8">
+                <button
+                  id="tab-list"
+                  class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                >
+                  Broadcast List
+                </button>
+                <button
+                  id="tab-create"
+                  class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                >
+                  Create Broadcast
+                </button>
+              </nav>
+            </div>
+          </div>
+
+          <!-- No broadcast type selector - single menu approach -->
+
+          <!-- Create Broadcast Tab Content -->
+          <div id="create-broadcast-content" class="hidden">
+            <!-- Create Broadcast Form -->
+            <div class="bg-white shadow rounded-lg p-6">
+              <div
+                id="create-error-message"
+                class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+              ></div>
+              <div
+                id="create-success-message"
+                class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
+              ></div>
+
+              <form id="broadcast-form" class="space-y-6">
+                <div>
+                  <label
+                    for="client-info"
+                    class="block text-sm font-medium text-gray-700"
+                    >Client Info</label
+                  >
+                  <input
+                    type="text"
+                    id="client-info"
+                    name="client-info"
+                    required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    for="broadcast-date"
+                    class="block text-sm font-medium text-gray-700"
+                    >Broadcast Date</label
+                  >
+                  <input
+                    type="datetime-local"
+                    id="broadcast-date"
+                    name="broadcast-date"
+                    required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    for="broadcast-message"
+                    class="block text-sm font-medium text-gray-700"
+                    >Broadcast Message</label
+                  >
+                  <textarea
+                    id="broadcast-message"
+                    name="broadcast-message"
+                    rows="4"
+                    required
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  ></textarea>
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <span id="create-text">Create Broadcast</span>
+                    <span id="create-spinner" class="hidden ml-2">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Import Recipients Section (Hidden until broadcast is created) -->
+            <div id="import-recipients-section" class="mt-8 hidden">
+              <h2 class="text-lg font-semibold text-gray-700 mb-4">
+                Import Recipients
+              </h2>
+              <div class="bg-white shadow rounded-lg p-6">
+                <div
+                  id="import-error-message"
+                  class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+                ></div>
+                <div
+                  id="import-success-message"
+                  class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
+                ></div>
+
+                <h3 class="text-md font-medium text-gray-700 mb-4">
+                  Choose Import Type
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div
+                    class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"
+                  >
+                    <h4 class="text-sm font-medium text-indigo-700 mb-2">
+                      Regular Import
+                    </h4>
+                    <p class="text-xs text-gray-600 mb-4">
+                      Use this for standard broadcasts with phone numbers only.
+                    </p>
+
+                    <!-- Regular Import Form -->
+                    <form id="regular-import-form" class="space-y-6">
+                      <input
+                        type="hidden"
+                        id="regular-broadcast-id"
+                        name="broadcast-id"
+                      />
+
+                      <div>
+                        <label
+                          for="regular-recipient-file"
+                          class="block text-sm font-medium text-gray-700"
+                          >Upload Excel File (Regular Format)</label
+                        >
+                        <input
+                          type="file"
+                          id="regular-recipient-file"
+                          name="file"
+                          accept=".xlsx,.xls"
+                          required
+                          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <p class="mt-1 text-sm text-gray-500">
+                          Upload Excel file with recipient data (phone numbers
+                          only)
+                        </p>
+                      </div>
+
+                      <div>
+                        <button
+                          type="submit"
+                          class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <span id="regular-import-text"
+                            >Import Recipients</span
+                          >
+                          <span id="regular-import-spinner" class="hidden ml-2">
+                            <i class="fas fa-spinner fa-spin"></i>
+                          </span>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div
+                    class="bg-purple-50 p-4 rounded-lg border border-purple-200"
+                  >
+                    <h4 class="text-sm font-medium text-purple-700 mb-2">
+                      Pecatu Import
+                    </h4>
+                    <p class="text-xs text-gray-600 mb-4">
+                      Use this for Pecatu broadcasts with name and unique
+                      identifier.
+                    </p>
+
+                    <!-- Pecatu Import Form -->
+                    <form id="pecatu-import-form" class="space-y-6">
+                      <input
+                        type="hidden"
+                        id="pecatu-broadcast-id"
+                        name="broadcast-id"
+                      />
+
+                      <div>
+                        <label
+                          for="pecatu-recipient-file"
+                          class="block text-sm font-medium text-gray-700"
+                          >Upload Excel File (Pecatu Format)</label
+                        >
+                        <input
+                          type="file"
+                          id="pecatu-recipient-file"
+                          name="file"
+                          accept=".xlsx,.xls"
+                          required
+                          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <p class="mt-1 text-sm text-gray-500">
+                          Upload Excel file with Pecatu recipient data (includes
+                          name and unique identifier)
+                        </p>
+                      </div>
+
+                      <div>
+                        <button
+                          type="submit"
+                          class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <span id="pecatu-import-text"
+                            >Import Pecatu Recipients</span
+                          >
+                          <span id="pecatu-import-spinner" class="hidden ml-2">
+                            <i class="fas fa-spinner fa-spin"></i>
+                          </span>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Send Broadcast Section (Hidden until recipients are imported) -->
+            <div id="send-broadcast-section" class="mt-8 hidden">
+              <h2 class="text-lg font-semibold text-gray-700 mb-4">
+                Send Broadcast
+              </h2>
+              <div class="bg-white shadow rounded-lg p-6">
+                <div
+                  id="send-error-message"
+                  class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+                ></div>
+                <div
+                  id="send-success-message"
+                  class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
+                ></div>
+
+                <h3 class="text-md font-medium text-gray-700 mb-4">
+                  Choose Broadcast Type
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Regular Broadcast Send Button -->
+                  <div
+                    id="regular-send-section"
+                    class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"
+                  >
+                    <div class="mb-4">
+                      <p class="text-sm text-gray-600">
+                        Ready to send regular broadcast message to all
+                        recipients.
+                      </p>
+                    </div>
+
+                    <button
+                      id="send-regular-broadcast-btn"
+                      class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      <span id="send-regular-text">Send Regular Broadcast</span>
+                      <span id="send-regular-spinner" class="hidden ml-2">
+                        <i class="fas fa-spinner fa-spin"></i>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Pecatu Broadcast Send Button -->
+                <div
+                  id="pecatu-send-section"
+                  class="bg-purple-50 p-4 rounded-lg border border-purple-200"
+                >
+                  <div class="mb-4">
+                    <p class="text-sm text-gray-600">
+                      Ready to send Pecatu broadcast message to all recipients.
+                    </p>
+                  </div>
+
+                  <button
+                    id="send-pecatu-broadcast-btn"
+                    class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    <span id="send-pecatu-text">Send Pecatu Broadcast</span>
+                    <span id="send-pecatu-spinner" class="hidden ml-2">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Broadcast List Tab Content -->
+          <div id="broadcast-list-content">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold text-gray-700">
+                Broadcast List
+              </h2>
+              <button
+                id="new-broadcast-btn"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+              >
+                <i class="fas fa-plus mr-2"></i> New Broadcast
+              </button>
+            </div>
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      #
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Client Info
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Plan Date
+                    </th>
+
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Type
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Status
+                    </th>
+                    <th
+                      scope="col"
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="broadcast-list"
+                  class="bg-white divide-y divide-gray-200"
+                >
+                  <!-- Broadcasts will be loaded here -->
+                  <tr>
+                    <td
+                      colspan="5"
+                      class="px-6 py-4 text-center text-sm text-gray-500"
+                    >
+                      Loading broadcasts...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Broadcast Detail Modal -->
+          <div
+            id="broadcast-detail-modal"
+            class="fixed inset-0 z-50 overflow-y-auto hidden"
+            aria-labelledby="modal-title"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+            >
+              <div
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                aria-hidden="true"
+              ></div>
+              <span
+                class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+                >&#8203;</span
+              >
+              <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              >
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div class="sm:flex sm:items-start">
+                    <div
+                      class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"
+                    >
+                      <h3
+                        class="text-lg leading-6 font-medium text-gray-900"
+                        id="modal-title"
+                      >
+                        Broadcast Details
+                      </h3>
+                      <div class="mt-4">
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Client Info
+                          </h4>
+                          <p
+                            id="detail-client-info"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Broadcast Date
+                          </h4>
+                          <p
+                            id="detail-broadcast-date"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Message
+                          </h4>
+                          <p
+                            id="detail-message"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Type
+                          </h4>
+                          <p
+                            id="detail-type"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Status
+                          </h4>
+                          <p
+                            id="detail-status"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Recipients
+                          </h4>
+                          <div class="mt-1 max-h-40 overflow-y-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                              <thead class="bg-gray-50">
+                                <tr>
+                                  <th
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Number
+                                  </th>
+                                  <th
+                                    id="recipient-name-header"
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
+                                  >
+                                    Name
+                                  </th>
+                                  <th
+                                    id="recipient-identifier-header"
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
+                                  >
+                                    Identifier
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Status
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody
+                                id="detail-recipients"
+                                class="bg-white divide-y divide-gray-200"
+                              >
+                                <!-- Recipients will be loaded here -->
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+                >
+                  <button
+                    type="button"
+                    id="close-detail-modal-btn"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Import Recipients Modal -->
+          <div
+            id="import-modal"
+            class="fixed inset-0 z-50 overflow-y-auto hidden"
+            aria-labelledby="import-modal-title"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+            >
+              <div
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                aria-hidden="true"
+              ></div>
+              <span
+                class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+                >&#8203;</span
+              >
+              <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              >
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div class="sm:flex sm:items-start">
+                    <div
+                      class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"
+                    >
+                      <h3
+                        class="text-lg leading-6 font-medium text-gray-900"
+                        id="import-modal-title"
+                      >
+                        Import Recipients
+                      </h3>
+                      <div class="mt-4">
+                        <div
+                          id="import-modal-error-message"
+                          class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+                        ></div>
+                        <div
+                          id="import-modal-success-message"
+                          class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
+                        ></div>
+
+                        <p class="text-sm text-gray-500 mb-4">
+                          Import recipients for broadcast:
+                          <span
+                            id="import-modal-client-info"
+                            class="font-medium"
+                          ></span>
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                          <!-- Regular Import Form -->
+                          <div
+                            class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"
+                          >
+                            <h4
+                              class="text-sm font-medium text-indigo-700 mb-2"
+                            >
+                              Regular Import
+                            </h4>
+                            <p class="text-xs text-gray-600 mb-4">
+                              Use this for standard broadcasts with phone
+                              numbers only.
+                            </p>
+
+                            <form
+                              id="modal-regular-import-form"
+                              class="space-y-6"
+                            >
+                              <input
+                                type="hidden"
+                                id="modal-regular-broadcast-id"
+                                name="broadcast-id"
+                              />
+
+                              <div>
+                                <label
+                                  for="modal-regular-recipient-file"
+                                  class="block text-sm font-medium text-gray-700"
+                                  >Upload Excel File</label
+                                >
+                                <input
+                                  type="file"
+                                  id="modal-regular-recipient-file"
+                                  name="file"
+                                  accept=".xlsx,.xls"
+                                  required
+                                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                              </div>
+
+                              <div>
+                                <button
+                                  type="submit"
+                                  class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                  <span id="modal-regular-import-text"
+                                    >Import</span
+                                  >
+                                  <span
+                                    id="modal-regular-import-spinner"
+                                    class="hidden ml-2"
+                                  >
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                  </span>
+                                </button>
+                              </div>
+                            </form>
+                          </div>
+
+                          <!-- Pecatu Import Form -->
+                          <div
+                            class="bg-purple-50 p-4 rounded-lg border border-purple-200"
+                          >
+                            <h4
+                              class="text-sm font-medium text-purple-700 mb-2"
+                            >
+                              Pecatu Import
+                            </h4>
+                            <p class="text-xs text-gray-600 mb-4">
+                              Use this for Pecatu broadcasts with name and
+                              unique identifier.
+                            </p>
+
+                            <form
+                              id="modal-pecatu-import-form"
+                              class="space-y-6"
+                            >
+                              <input
+                                type="hidden"
+                                id="modal-pecatu-broadcast-id"
+                                name="broadcast-id"
+                              />
+
+                              <div>
+                                <label
+                                  for="modal-pecatu-recipient-file"
+                                  class="block text-sm font-medium text-gray-700"
+                                  >Upload Excel File</label
+                                >
+                                <input
+                                  type="file"
+                                  id="modal-pecatu-recipient-file"
+                                  name="file"
+                                  accept=".xlsx,.xls"
+                                  required
+                                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                              </div>
+
+                              <div>
+                                <button
+                                  type="submit"
+                                  class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                                >
+                                  <span id="modal-pecatu-import-text"
+                                    >Import</span
+                                  >
+                                  <span
+                                    id="modal-pecatu-import-spinner"
+                                    class="hidden ml-2"
+                                  >
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                  </span>
+                                </button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+                >
+                  <button
+                    type="button"
+                    id="close-import-modal-btn"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Send Broadcast Modal -->
+          <div
+            id="send-modal"
+            class="fixed inset-0 z-50 overflow-y-auto hidden"
+            aria-labelledby="send-modal-title"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+            >
+              <div
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                aria-hidden="true"
+              ></div>
+              <span
+                class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+                >&#8203;</span
+              >
+              <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              >
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div class="sm:flex sm:items-start">
+                    <div
+                      class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"
+                    >
+                      <h3
+                        class="text-lg leading-6 font-medium text-gray-900"
+                        id="send-modal-title"
+                      >
+                        Send Broadcast
+                      </h3>
+                      <div class="mt-4">
+                        <div
+                          id="send-modal-error-message"
+                          class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
+                        ></div>
+                        <div
+                          id="send-modal-success-message"
+                          class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
+                        ></div>
+
+                        <p class="text-sm text-gray-500 mb-4">
+                          Send broadcast ID:
+                          <span
+                            id="send-modal-broadcast-id"
+                            class="font-medium"
+                          ></span>
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                          <!-- Regular Broadcast Send Button -->
+                          <div
+                            id="send-modal-regular-section"
+                            class="bg-indigo-50 p-4 rounded-lg border border-indigo-200"
+                          >
+                            <h4
+                              class="text-sm font-medium text-indigo-700 mb-2"
+                            >
+                              Regular Broadcast
+                            </h4>
+                            <p class="text-xs text-gray-600 mb-4">
+                              Send as a regular broadcast with no
+                              personalization.
+                            </p>
+
+                            <button
+                              id="send-modal-regular-btn"
+                              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                              <span id="send-modal-regular-text"
+                                >Send Regular</span
+                              >
+                              <span
+                                id="send-modal-regular-spinner"
+                                class="hidden ml-2"
+                              >
+                                <i class="fas fa-spinner fa-spin"></i>
+                              </span>
+                            </button>
+                          </div>
+
+                          <!-- Pecatu Broadcast Send Button -->
+                          <div
+                            id="send-modal-pecatu-section"
+                            class="bg-purple-50 p-4 rounded-lg border border-purple-200"
+                          >
+                            <h4
+                              class="text-sm font-medium text-purple-700 mb-2"
+                            >
+                              Pecatu Broadcast
+                            </h4>
+                            <p class="text-xs text-gray-600 mb-4">
+                              Send as a Pecatu broadcast with name and
+                              identifier personalization.
+                            </p>
+
+                            <button
+                              id="send-modal-pecatu-btn"
+                              class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                            >
+                              <span id="send-modal-pecatu-text"
+                                >Send Pecatu</span
+                              >
+                              <span
+                                id="send-modal-pecatu-spinner"
+                                class="hidden ml-2"
+                              >
+                                <i class="fas fa-spinner fa-spin"></i>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+
+                        <!-- Recipients List -->
+                        <div class="mt-6">
+                          <h4 class="text-sm font-medium text-gray-700 mb-2">
+                            Recipients
+                          </h4>
+                          <div
+                            class="max-h-60 overflow-y-auto border border-gray-200 rounded-md"
+                          >
+                            <table class="min-w-full divide-y divide-gray-200">
+                              <thead class="bg-gray-50">
+                                <tr>
+                                  <th
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Number
+                                  </th>
+                                  <th
+                                    id="send-modal-name-header"
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
+                                  >
+                                    Name
+                                  </th>
+                                  <th
+                                    id="send-modal-identifier-header"
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
+                                  >
+                                    Identifier
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Status
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Action
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody
+                                id="send-modal-recipients"
+                                class="bg-white divide-y divide-gray-200"
+                              >
+                                <tr>
+                                  <td
+                                    colspan="5"
+                                    class="px-3 py-2 text-center text-sm text-gray-500"
+                                  >
+                                    Loading recipients...
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+                >
+                  <button
+                    type="button"
+                    id="close-send-modal-btn"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+              <span
+                class="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+                >&#8203;</span
+              >
+              <div
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+              >
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div class="sm:flex sm:items-start">
+                    <div
+                      class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full"
+                    >
+                      <h3
+                        class="text-lg leading-6 font-medium text-gray-900"
+                        id="modal-title"
+                      >
+                        Broadcast Details
+                      </h3>
+                      <div class="mt-4">
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Client Info
+                          </h4>
+                          <p
+                            id="detail-client-info"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Broadcast Date
+                          </h4>
+                          <p
+                            id="detail-broadcast-date"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Message
+                          </h4>
+                          <p
+                            id="detail-message"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Type
+                          </h4>
+                          <p
+                            id="detail-type"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Status
+                          </h4>
+                          <p
+                            id="detail-status"
+                            class="mt-1 text-sm text-gray-900"
+                          ></p>
+                        </div>
+                        <div class="mb-4">
+                          <h4 class="text-sm font-medium text-gray-700">
+                            Recipients
+                          </h4>
+                          <div class="mt-1 max-h-40 overflow-y-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                              <thead class="bg-gray-50">
+                                <tr>
+                                  <th
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Number
+                                  </th>
+                                  <th
+                                    id="recipient-name-header"
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
+                                  >
+                                    Name
+                                  </th>
+                                  <th
+                                    id="recipient-identifier-header"
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
+                                  >
+                                    Identifier
+                                  </th>
+                                  <th
+                                    scope="col"
+                                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Status
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody
+                                id="detail-recipients"
+                                class="bg-white divide-y divide-gray-200"
+                              >
+                                <!-- Recipients will be loaded here -->
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+                >
+                  <button
+                    type="button"
+                    id="close-detail-modal-btn"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Check if user is logged in
+        const token = localStorage.getItem("admin_token");
+        if (!token) {
+          window.location.href = "/admin";
+          return;
+        }
+
+        // Set user name
+        const user = JSON.parse(localStorage.getItem("admin_user") || "{}");
+        document.getElementById("user-name").textContent =
+          user.name || "Admin User";
+
+        // Mobile sidebar toggle
+        const mobileSidebar = document.getElementById("mobile-sidebar");
+        const openSidebarBtn = document.getElementById("open-sidebar-btn");
+        const closeSidebarBtn = document.getElementById("close-sidebar-btn");
+        const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+
+        openSidebarBtn.addEventListener("click", () => {
+          mobileSidebar.style.display = "flex";
+        });
+
+        closeSidebarBtn.addEventListener("click", () => {
+          mobileSidebar.style.display = "none";
+        });
+
+        sidebarBackdrop.addEventListener("click", () => {
+          mobileSidebar.style.display = "none";
+        });
+
+        // Logout functionality
+        const logoutBtn = document.getElementById("logout-btn");
+        const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
+
+        function handleLogout() {
+          localStorage.removeItem("admin_token");
+          localStorage.removeItem("admin_user");
+          window.location.href = "/admin";
+        }
+
+        logoutBtn.addEventListener("click", handleLogout);
+        mobileLogoutBtn.addEventListener("click", handleLogout);
+
+        // Modal close buttons
+        document
+          .getElementById("close-detail-modal-btn")
+          .addEventListener("click", function () {
+            document
+              .getElementById("broadcast-detail-modal")
+              .classList.add("hidden");
+          });
+
+        document
+          .getElementById("close-import-modal-btn")
+          .addEventListener("click", function () {
+            document.getElementById("import-modal").classList.add("hidden");
+          });
+
+        document
+          .getElementById("close-send-modal-btn")
+          .addEventListener("click", function () {
+            document.getElementById("send-modal").classList.add("hidden");
+          });
+
+        // Tab switching
+        const tabCreate = document.getElementById("tab-create");
+        const tabList = document.getElementById("tab-list");
+        const createBroadcastContent = document.getElementById(
+          "create-broadcast-content"
+        );
+        const broadcastListContent = document.getElementById(
+          "broadcast-list-content"
+        );
+
+        tabCreate.addEventListener("click", () => {
+          tabCreate.classList.add("border-indigo-500", "text-indigo-600");
+          tabCreate.classList.remove("border-transparent", "text-gray-500");
+          tabList.classList.add("border-transparent", "text-gray-500");
+          tabList.classList.remove("border-indigo-500", "text-indigo-600");
+          createBroadcastContent.classList.remove("hidden");
+          broadcastListContent.classList.add("hidden");
+        });
+
+        tabList.addEventListener("click", () => {
+          tabList.classList.add("border-indigo-500", "text-indigo-600");
+          tabList.classList.remove("border-transparent", "text-gray-500");
+          tabCreate.classList.add("border-transparent", "text-gray-500");
+          tabCreate.classList.remove("border-indigo-500", "text-indigo-600");
+          broadcastListContent.classList.remove("hidden");
+          createBroadcastContent.classList.add("hidden");
+          loadBroadcasts(); // Load broadcasts when switching to the list tab
+        });
+
+        // Get references to import forms and send sections
+        const regularImportForm = document.getElementById(
+          "regular-import-form"
+        );
+        const pecatuImportForm = document.getElementById("pecatu-import-form");
+        const regularSendSection = document.getElementById(
+          "regular-send-section"
+        );
+        const pecatuSendSection = document.getElementById(
+          "pecatu-send-section"
+        );
+
+        // Create broadcast form
+        const broadcastForm = document.getElementById("broadcast-form");
+        const createErrorMessage = document.getElementById(
+          "create-error-message"
+        );
+        const createSuccessMessage = document.getElementById(
+          "create-success-message"
+        );
+        const createText = document.getElementById("create-text");
+        const createSpinner = document.getElementById("create-spinner");
+        const importRecipientsSection = document.getElementById(
+          "import-recipients-section"
+        );
+        const broadcastIdInput = document.getElementById("broadcast-id");
+
+        broadcastForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Show loading state
+          createText.textContent = "Creating...";
+          createSpinner.classList.remove("hidden");
+          createErrorMessage.classList.add("hidden");
+          createSuccessMessage.classList.add("hidden");
+
+          const clientInfo = document.getElementById("client-info").value;
+          const broadcastDate = document.getElementById("broadcast-date").value;
+          const broadcastMessage =
+            document.getElementById("broadcast-message").value;
+
+          // Format date to ISO string
+          const formattedDate = new Date(broadcastDate).toISOString();
+          const currentDate = new Date().toISOString();
+          const broadcastCode = "BC-" + Date.now();
+
+          try {
+            const response = await fetch("/api/v1/broadcast/create", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                client_info: clientInfo,
+                broadcast_plan_at: formattedDate,
+                broadcast_message: broadcastMessage,
+                created_at: currentDate,
+                broadcast_code: broadcastCode,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              createSuccessMessage.textContent =
+                "Broadcast created successfully!";
+              createSuccessMessage.classList.remove("hidden");
+
+              // Show import recipients section
+              importRecipientsSection.classList.remove("hidden");
+
+              // Set broadcast ID for both import forms
+              document.getElementById("regular-broadcast-id").value =
+                data.data.id;
+              document.getElementById("pecatu-broadcast-id").value =
+                data.data.id;
+
+              // Disable form fields
+              document.getElementById("client-info").disabled = true;
+              document.getElementById("broadcast-date").disabled = true;
+              document.getElementById("broadcast-message").disabled = true;
+              document.querySelector(
+                '#broadcast-form button[type="submit"]'
+              ).disabled = true;
+            } else {
+              // Show error message
+              createErrorMessage.textContent =
+                data.meta.message ||
+                "Failed to create broadcast. Please try again.";
+              createErrorMessage.classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            createErrorMessage.textContent =
+              "An error occurred. Please try again.";
+            createErrorMessage.classList.remove("hidden");
+            console.error("Error creating broadcast:", error);
+          } finally {
+            // Reset create button
+            createText.textContent = "Create Broadcast";
+            createSpinner.classList.add("hidden");
+          }
+        });
+
+        // Import recipients forms
+        const importErrorMessage = document.getElementById(
+          "import-error-message"
+        );
+        const importSuccessMessage = document.getElementById(
+          "import-success-message"
+        );
+        const sendBroadcastSection = document.getElementById(
+          "send-broadcast-section"
+        );
+
+        // Regular import form
+        const regularImportText = document.getElementById(
+          "regular-import-text"
+        );
+        const regularImportSpinner = document.getElementById(
+          "regular-import-spinner"
+        );
+
+        regularImportForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Show loading state
+          regularImportText.textContent = "Importing...";
+          regularImportSpinner.classList.remove("hidden");
+          importErrorMessage.classList.add("hidden");
+          importSuccessMessage.classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "regular-broadcast-id"
+          ).value;
+          const recipientFile = document.getElementById(
+            "regular-recipient-file"
+          ).files[0];
+
+          if (!recipientFile) {
+            importErrorMessage.textContent = "Please select a file to upload.";
+            importErrorMessage.classList.remove("hidden");
+            regularImportText.textContent = "Import Recipients";
+            regularImportSpinner.classList.add("hidden");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file", recipientFile);
+          formData.append("broadcast_id", broadcastId);
+
+          try {
+            const response = await fetch("/api/v1/broadcast/import-recipient", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              importSuccessMessage.textContent =
+                "Recipients imported successfully!";
+              importSuccessMessage.classList.remove("hidden");
+
+              // Show send broadcast section
+              sendBroadcastSection.classList.remove("hidden");
+
+              // Disable import form
+              document.getElementById("regular-recipient-file").disabled = true;
+              document.querySelector(
+                '#regular-import-form button[type="submit"]'
+              ).disabled = true;
+            } else {
+              // Show error message
+              importErrorMessage.textContent =
+                data.meta.message ||
+                "Failed to import recipients. Please try again.";
+              importErrorMessage.classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            importErrorMessage.textContent =
+              "An error occurred. Please try again.";
+            importErrorMessage.classList.remove("hidden");
+            console.error("Error importing recipients:", error);
+          } finally {
+            // Reset import button
+            regularImportText.textContent = "Import Recipients";
+            regularImportSpinner.classList.add("hidden");
+          }
+        });
+
+        // Pecatu import form
+        const pecatuImportText = document.getElementById("pecatu-import-text");
+        const pecatuImportSpinner = document.getElementById(
+          "pecatu-import-spinner"
+        );
+
+        pecatuImportForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Show loading state
+          pecatuImportText.textContent = "Importing...";
+          pecatuImportSpinner.classList.remove("hidden");
+          importErrorMessage.classList.add("hidden");
+          importSuccessMessage.classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "pecatu-broadcast-id"
+          ).value;
+          const recipientFile = document.getElementById("pecatu-recipient-file")
+            .files[0];
+
+          if (!recipientFile) {
+            importErrorMessage.textContent = "Please select a file to upload.";
+            importErrorMessage.classList.remove("hidden");
+            pecatuImportText.textContent = "Import Pecatu Recipients";
+            pecatuImportSpinner.classList.add("hidden");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file", recipientFile);
+          formData.append("broadcast_id", broadcastId);
+
+          try {
+            const response = await fetch(
+              "/api/v1/broadcast/pecatu/import-recipient",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+              }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              importSuccessMessage.textContent =
+                "Pecatu recipients imported successfully!";
+              importSuccessMessage.classList.remove("hidden");
+
+              // Show send broadcast section
+              sendBroadcastSection.classList.remove("hidden");
+
+              // Disable import form
+              document.getElementById("pecatu-recipient-file").disabled = true;
+              document.querySelector(
+                '#pecatu-import-form button[type="submit"]'
+              ).disabled = true;
+            } else {
+              // Show error message
+              importErrorMessage.textContent =
+                data.meta.message ||
+                "Failed to import Pecatu recipients. Please try again.";
+              importErrorMessage.classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            importErrorMessage.textContent =
+              "An error occurred. Please try again.";
+            importErrorMessage.classList.remove("hidden");
+            console.error("Error importing Pecatu recipients:", error);
+          } finally {
+            // Reset import button
+            pecatuImportText.textContent = "Import Pecatu Recipients";
+            pecatuImportSpinner.classList.add("hidden");
+          }
+        });
+
+        // Send broadcast buttons
+        const sendErrorMessage = document.getElementById("send-error-message");
+        const sendSuccessMessage = document.getElementById(
+          "send-success-message"
+        );
+
+        // Regular broadcast send button
+        const sendRegularBroadcastBtn = document.getElementById(
+          "send-regular-broadcast-btn"
+        );
+        const sendRegularText = document.getElementById("send-regular-text");
+        const sendRegularSpinner = document.getElementById(
+          "send-regular-spinner"
+        );
+
+        sendRegularBroadcastBtn.addEventListener("click", async function () {
+          // Show loading state
+          sendRegularText.textContent = "Sending...";
+          sendRegularSpinner.classList.remove("hidden");
+          sendErrorMessage.classList.add("hidden");
+          sendSuccessMessage.classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "regular-broadcast-id"
+          ).value;
+
+          try {
+            const response = await fetch("/api/v1/broadcast/send", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                broadcast_id: broadcastId,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              sendSuccessMessage.textContent =
+                "Regular broadcast sent successfully!";
+              sendSuccessMessage.classList.remove("hidden");
+
+              // Disable send button
+              sendRegularBroadcastBtn.disabled = true;
+
+              // Switch to broadcast list tab
+              setTimeout(() => {
+                tabList.click();
+              }, 2000);
+            } else {
+              // Show error message
+              sendErrorMessage.textContent =
+                data.error ||
+                "Failed to send regular broadcast. Please try again.";
+              sendErrorMessage.classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            sendErrorMessage.textContent =
+              "An error occurred. Please try again.";
+            sendErrorMessage.classList.remove("hidden");
+            console.error("Error sending regular broadcast:", error);
+          } finally {
+            // Reset send button
+            sendRegularText.textContent = "Send Regular Broadcast";
+            sendRegularSpinner.classList.add("hidden");
+          }
+        });
+
+        // Pecatu broadcast send button
+        const sendPecatuBroadcastBtn = document.getElementById(
+          "send-pecatu-broadcast-btn"
+        );
+        const sendPecatuText = document.getElementById("send-pecatu-text");
+        const sendPecatuSpinner = document.getElementById(
+          "send-pecatu-spinner"
+        );
+
+        sendPecatuBroadcastBtn.addEventListener("click", async function () {
+          // Show loading state
+          sendPecatuText.textContent = "Sending...";
+          sendPecatuSpinner.classList.remove("hidden");
+          sendErrorMessage.classList.add("hidden");
+          sendSuccessMessage.classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "pecatu-broadcast-id"
+          ).value;
+
+          try {
+            const response = await fetch("/api/v1/broadcast/pecatu/send", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                broadcast_id: broadcastId,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              sendSuccessMessage.textContent =
+                "Pecatu broadcast sent successfully!";
+              sendSuccessMessage.classList.remove("hidden");
+
+              // Disable send button
+              sendPecatuBroadcastBtn.disabled = true;
+
+              // Switch to broadcast list tab
+              setTimeout(() => {
+                tabList.click();
+              }, 2000);
+            } else {
+              // Show error message
+              sendErrorMessage.textContent =
+                data.error ||
+                "Failed to send Pecatu broadcast. Please try again.";
+              sendErrorMessage.classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            sendErrorMessage.textContent =
+              "An error occurred. Please try again.";
+            sendErrorMessage.classList.remove("hidden");
+            console.error("Error sending Pecatu broadcast:", error);
+          } finally {
+            // Reset send button
+            sendPecatuText.textContent = "Send Pecatu Broadcast";
+            sendPecatuSpinner.classList.add("hidden");
+          }
+        });
+
+        // Load broadcasts function
+        async function loadBroadcasts() {
+          const broadcastList = document.getElementById("broadcast-list");
+          broadcastList.innerHTML =
+            '<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Loading broadcasts...</td></tr>';
+
+          try {
+            // Fetch broadcasts from API
+            const response = await fetch("/api/v1/broadcast/list", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            const data = await response.json();
+
+            // Check if response is successful
+            if (!response.ok) {
+              throw new Error(
+                data.meta?.message || "Failed to load broadcasts"
+              );
+            }
+
+            // Get broadcasts from response data
+            const broadcasts = data.data || [];
+
+            if (broadcasts.length === 0) {
+              broadcastList.innerHTML =
+                '<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No broadcasts found</td></tr>';
+              return;
+            }
+
+            broadcastList.innerHTML = "";
+            broadcasts.forEach((broadcast, index) => {
+              const row = document.createElement("tr");
+
+              // Use plan date directly from the database
+              const formattedPlanDate = broadcast.broadcast_plan_at || "N/A";
+
+              // Use broadcast date directly from the database (if available)
+              let formattedBroadcastDate = "Not sent yet";
+              if (broadcast.broadcast_at) {
+                formattedBroadcastDate = broadcast.broadcast_at;
+              }
+
+              // Status badge color
+              let statusClass = "bg-gray-100 text-gray-800";
+              if (
+                broadcast.broadcast_job_status === "Completed" ||
+                broadcast.broadcast_job_status === "Success"
+              ) {
+                statusClass = "bg-green-100 text-green-800";
+              } else if (
+                broadcast.broadcast_job_status === "In Progress" ||
+                broadcast.broadcast_job_status === "Starting" ||
+                broadcast.broadcast_job_status === "Processing"
+              ) {
+                statusClass = "bg-blue-100 text-blue-800";
+              } else if (
+                broadcast.broadcast_job_status === "Waiting" ||
+                broadcast.broadcast_job_status === "Pending"
+              ) {
+                statusClass = "bg-yellow-100 text-yellow-800";
+              } else if (broadcast.broadcast_job_status === "Failed") {
+                statusClass = "bg-red-100 text-red-800";
+              }
+
+              // Type badge color
+              let typeClass = "bg-indigo-100 text-indigo-800";
+              let typeText = "Regular";
+              if (broadcast.broadcast_type === "pecatu") {
+                typeClass = "bg-purple-100 text-purple-800";
+                typeText = "Pecatu";
+              }
+
+              row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${index + 1}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">
+                                ${broadcast.client_info}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${formattedPlanDate}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${typeClass}">
+                                    ${typeText}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                                    ${broadcast.broadcast_job_status}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <div class="flex space-x-2">
+                                    <a href="javascript:void(0)" class="text-indigo-600 hover:text-indigo-900 view-details" data-id="${
+                                      broadcast.id
+                                    }">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    <a href="javascript:void(0)" class="text-green-600 hover:text-green-900 import-recipients" data-id="${
+                                      broadcast.id
+                                    }" data-client="${broadcast.client_info}">
+                                        <i class="fas fa-file-import"></i> Import
+                                    </a>
+                                    <a href="javascript:void(0)" class="text-blue-600 hover:text-blue-900 send-broadcast" data-id="${
+                                      broadcast.id
+                                    }" data-type="${broadcast.broadcast_type}">
+                                        <i class="fas fa-paper-plane"></i> Send
+                                    </a>
+                                    <a href="/admin/broadcast/recipients?id=${
+                                      broadcast.id
+                                    }" class="text-purple-600 hover:text-purple-900">
+                                        <i class="fas fa-users"></i> Recipients
+                                    </a>
+                                </div>
+                            </td>
+                        `;
+
+              broadcastList.appendChild(row);
+            });
+
+            // Add event listeners to links
+            document.querySelectorAll(".view-details").forEach((link) => {
+              link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const broadcastId = link.getAttribute("data-id");
+                viewBroadcastDetails(broadcastId);
+              });
+            });
+
+            document.querySelectorAll(".import-recipients").forEach((link) => {
+              link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const broadcastId = link.getAttribute("data-id");
+                const clientInfo = link.getAttribute("data-client");
+                showImportModal(broadcastId, clientInfo);
+              });
+            });
+
+            document.querySelectorAll(".send-broadcast").forEach((link) => {
+              link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const broadcastId = link.getAttribute("data-id");
+                const broadcastType = link.getAttribute("data-type");
+                showSendModal(broadcastId, broadcastType);
+              });
+            });
+          } catch (error) {
+            console.error("Error loading broadcasts:", error);
+            broadcastList.innerHTML =
+              '<tr><td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">Error loading broadcasts</td></tr>';
+          }
+        }
+
+        // View broadcast details function
+        async function viewBroadcastDetails(broadcastId) {
+          const detailModal = document.getElementById("broadcast-detail-modal");
+          const detailClientInfo =
+            document.getElementById("detail-client-info");
+          const detailBroadcastDate = document.getElementById(
+            "detail-broadcast-date"
+          );
+          const detailMessage = document.getElementById("detail-message");
+          const detailStatus = document.getElementById("detail-status");
+          const detailRecipients = document.getElementById("detail-recipients");
+
+          // Show modal
+          detailModal.classList.remove("hidden");
+
+          // Reset content
+          detailClientInfo.textContent = "Loading...";
+          detailBroadcastDate.textContent = "Loading...";
+          detailMessage.textContent = "Loading...";
+          detailStatus.textContent = "Loading...";
+          // Default to 2 columns, will be updated based on broadcast type
+          detailRecipients.innerHTML =
+            '<tr><td colspan="2" class="px-3 py-2 text-center text-sm text-gray-500">Loading recipients...</td></tr>';
+
+          try {
+            // Fetch broadcast details from API
+            const detailResponse = await fetch(
+              `/api/v1/broadcast/detail/${broadcastId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const detailData = await detailResponse.json();
+
+            // Check if response is successful
+            if (!detailResponse.ok) {
+              throw new Error(
+                detailData.meta?.message || "Failed to load broadcast details"
+              );
+            }
+
+            // Get broadcast details from response data
+            const broadcast = detailData.data || {};
+
+            // Fetch recipients for this broadcast
+            const recipientsResponse = await fetch(
+              `/api/v1/broadcast/recipients/${broadcastId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const recipientsData = await recipientsResponse.json();
+
+            // Check if response is successful
+            if (!recipientsResponse.ok) {
+              throw new Error(
+                recipientsData.meta?.message || "Failed to load recipients"
+              );
+            }
+
+            // Get recipients from response data
+            const recipients = recipientsData.data?.recipients || [];
+
+            // Determine broadcast type based on recipients
+            let broadcastType = "regular";
+            const hasPecatuRecipients = recipients.some(
+              (r) => r.recipient_name && r.recipient_unique_identifier
+            );
+            if (hasPecatuRecipients) {
+              broadcastType = "pecatu";
+            }
+
+            // Add broadcast type to the broadcast object
+            broadcast.broadcast_type = broadcastType;
+
+            // Use date directly from the database
+            const formattedDate = broadcast.broadcast_plan_at || "N/A";
+
+            // Update modal content
+            detailClientInfo.textContent = broadcast.client_info;
+            detailBroadcastDate.textContent = formattedDate;
+            detailMessage.textContent = broadcast.broadcast_message;
+
+            // Set broadcast type with proper capitalization
+            const detailType = document.getElementById("detail-type");
+            detailType.textContent =
+              broadcast.broadcast_type === "pecatu" ? "Pecatu" : "Regular";
+
+            detailStatus.textContent = broadcast.broadcast_job_status;
+
+            // Show/hide Pecatu-specific columns based on broadcast type
+            const nameHeader = document.getElementById("recipient-name-header");
+            const identifierHeader = document.getElementById(
+              "recipient-identifier-header"
+            );
+
+            if (broadcast.broadcast_type === "pecatu") {
+              nameHeader.classList.remove("hidden");
+              identifierHeader.classList.remove("hidden");
+            } else {
+              nameHeader.classList.add("hidden");
+              identifierHeader.classList.add("hidden");
+            }
+
+            // Update recipients table
+            if (recipients.length === 0) {
+              const colSpan = broadcast.broadcast_type === "pecatu" ? 4 : 2;
+              detailRecipients.innerHTML = `<tr><td colspan="${colSpan}" class="px-3 py-2 text-center text-sm text-gray-500">No recipients found</td></tr>`;
+            } else {
+              detailRecipients.innerHTML = "";
+              recipients.forEach((recipient) => {
+                const row = document.createElement("tr");
+
+                // Status badge color
+                let statusClass = "bg-gray-100 text-gray-800";
+                if (recipient.broadcast_status === "Success") {
+                  statusClass = "bg-green-100 text-green-800";
+                } else if (recipient.broadcast_status === "Pending") {
+                  statusClass = "bg-yellow-100 text-yellow-800";
+                } else if (recipient.broadcast_status === "Failed") {
+                  statusClass = "bg-red-100 text-red-800";
+                }
+
+                // Basic recipient info
+                let rowHTML = `
+                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                      ${recipient.whatsapp_number}
+                  </td>`;
+
+                // Add Pecatu-specific columns if this is a Pecatu broadcast
+                if (broadcast.broadcast_type === "pecatu") {
+                  rowHTML += `
+                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                      ${recipient.recipient_name || "-"}
+                  </td>
+                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                      ${recipient.recipient_unique_identifier || "-"}
+                  </td>`;
+                }
+
+                // Add status column
+                rowHTML += `
+                  <td class="px-3 py-2 whitespace-nowrap text-sm">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                          ${recipient.broadcast_status || "Pending"}
+                      </span>
+                  </td>`;
+
+                row.innerHTML = rowHTML;
+
+                detailRecipients.appendChild(row);
+              });
+            }
+          } catch (error) {
+            console.error("Error loading broadcast details:", error);
+            detailClientInfo.textContent = "Error loading details";
+            detailBroadcastDate.textContent = "Error loading details";
+            detailMessage.textContent = "Error loading details";
+            detailStatus.textContent = "Error loading details";
+            const errorColSpan = broadcast?.broadcast_type === "pecatu" ? 4 : 2;
+            detailRecipients.innerHTML = `<tr><td colspan="${errorColSpan}" class="px-3 py-2 text-center text-sm text-gray-500">Error loading recipients</td></tr>`;
+          }
+        }
+
+        // Show import modal function
+        function showImportModal(broadcastId, clientInfo) {
+          const importModal = document.getElementById("import-modal");
+          const clientInfoSpan = document.getElementById(
+            "import-modal-client-info"
+          );
+          const regularBroadcastId = document.getElementById(
+            "modal-regular-broadcast-id"
+          );
+          const pecatuBroadcastId = document.getElementById(
+            "modal-pecatu-broadcast-id"
+          );
+          const errorMessage = document.getElementById(
+            "import-modal-error-message"
+          );
+          const successMessage = document.getElementById(
+            "import-modal-success-message"
+          );
+
+          // Reset form and messages
+          errorMessage.classList.add("hidden");
+          successMessage.classList.add("hidden");
+          document.getElementById("modal-regular-import-form").reset();
+          document.getElementById("modal-pecatu-import-form").reset();
+
+          // Set broadcast ID and client info
+          clientInfoSpan.textContent = clientInfo;
+          regularBroadcastId.value = broadcastId;
+          pecatuBroadcastId.value = broadcastId;
+
+          // Show modal
+          importModal.classList.remove("hidden");
+        }
+
+        // Show send modal function
+        async function showSendModal(broadcastId, broadcastType) {
+          const sendModal = document.getElementById("send-modal");
+          const broadcastIdSpan = document.getElementById(
+            "send-modal-broadcast-id"
+          );
+          const errorMessage = document.getElementById(
+            "send-modal-error-message"
+          );
+          const successMessage = document.getElementById(
+            "send-modal-success-message"
+          );
+          const recipientsTable = document.getElementById(
+            "send-modal-recipients"
+          );
+          const nameHeader = document.getElementById("send-modal-name-header");
+          const identifierHeader = document.getElementById(
+            "send-modal-identifier-header"
+          );
+
+          // Reset messages
+          errorMessage.classList.add("hidden");
+          successMessage.classList.add("hidden");
+
+          // Set broadcast ID
+          broadcastIdSpan.textContent = broadcastId;
+
+          // Show loading state
+          recipientsTable.innerHTML =
+            '<tr><td colspan="5" class="px-3 py-2 text-center text-sm text-gray-500">Loading recipients...</td></tr>';
+
+          // Show modal
+          sendModal.classList.remove("hidden");
+
+          try {
+            // Fetch recipients for this broadcast
+            const response = await fetch(
+              `/api/v1/broadcast/recipients/${broadcastId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            const data = await response.json();
+
+            // Check if response is successful
+            if (!response.ok) {
+              throw new Error(
+                data.meta?.message || "Failed to load recipients"
+              );
+            }
+
+            // Get recipients from response data
+            const recipients = data.data?.recipients || [];
+
+            // Determine broadcast type based on recipients
+            let actualBroadcastType = broadcastType || "regular";
+            const hasPecatuRecipients = recipients.some(
+              (r) => r.recipient_name && r.recipient_unique_identifier
+            );
+            if (hasPecatuRecipients) {
+              actualBroadcastType = "pecatu";
+            }
+
+            // Show/hide Pecatu-specific columns based on broadcast type
+            if (actualBroadcastType === "pecatu") {
+              nameHeader.classList.remove("hidden");
+              identifierHeader.classList.remove("hidden");
+            } else {
+              nameHeader.classList.add("hidden");
+              identifierHeader.classList.add("hidden");
+            }
+
+            // Update recipients table
+            if (recipients.length === 0) {
+              const colSpan = actualBroadcastType === "pecatu" ? 5 : 3;
+              recipientsTable.innerHTML = `<tr><td colspan="${colSpan}" class="px-3 py-2 text-center text-sm text-gray-500">No recipients found</td></tr>`;
+            } else {
+              recipientsTable.innerHTML = "";
+              recipients.forEach((recipient) => {
+                const row = document.createElement("tr");
+
+                // Status badge color
+                let statusClass = "bg-gray-100 text-gray-800";
+                if (recipient.broadcast_status === "Success") {
+                  statusClass = "bg-green-100 text-green-800";
+                } else if (recipient.broadcast_status === "Pending") {
+                  statusClass = "bg-yellow-100 text-yellow-800";
+                } else if (recipient.broadcast_status === "Failed") {
+                  statusClass = "bg-red-100 text-red-800";
+                }
+
+                // Basic recipient info
+                let rowHTML = `
+                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                      ${recipient.whatsapp_number}
+                  </td>`;
+
+                // Add Pecatu-specific columns if this is a Pecatu broadcast
+                if (actualBroadcastType === "pecatu") {
+                  rowHTML += `
+                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                      ${recipient.recipient_name || "-"}
+                  </td>
+                  <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">
+                      ${recipient.recipient_unique_identifier || "-"}
+                  </td>`;
+                }
+
+                // Add status column
+                rowHTML += `
+                  <td class="px-3 py-2 whitespace-nowrap text-sm">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                          ${recipient.broadcast_status || "Pending"}
+                      </span>
+                  </td>`;
+
+                // Add action column
+                rowHTML += `
+                  <td class="px-3 py-2 whitespace-nowrap text-sm">
+                      <button class="text-blue-600 hover:text-blue-900 send-single" data-id="${recipient.id}" data-broadcast-id="${broadcastId}" data-type="${actualBroadcastType}">
+                          <i class="fas fa-paper-plane"></i> Send
+                      </button>
+                  </td>`;
+
+                row.innerHTML = rowHTML;
+                recipientsTable.appendChild(row);
+              });
+
+              // Add event listeners to send single buttons
+              document.querySelectorAll(".send-single").forEach((button) => {
+                button.addEventListener("click", () => {
+                  const recipientId = button.getAttribute("data-id");
+                  const broadcastId = button.getAttribute("data-broadcast-id");
+                  const broadcastType = button.getAttribute("data-type");
+                  sendSingleMessage(
+                    recipientId,
+                    broadcastId,
+                    broadcastType,
+                    button
+                  );
+                });
+              });
+            }
+          } catch (error) {
+            console.error("Error loading recipients:", error);
+            const errorColSpan = 5;
+            recipientsTable.innerHTML = `<tr><td colspan="${errorColSpan}" class="px-3 py-2 text-center text-sm text-gray-500">Error loading recipients: ${error.message}</td></tr>`;
+          }
+        }
+
+        // Send single message function
+        async function sendSingleMessage(
+          recipientId,
+          broadcastId,
+          broadcastType,
+          button
+        ) {
+          // Show loading state
+          const originalText = button.innerHTML;
+          button.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Sending...';
+          button.disabled = true;
+
+          try {
+            // Determine endpoint based on broadcast type
+            const endpoint =
+              broadcastType === "pecatu"
+                ? "/api/v1/broadcast/pecatu/send-single"
+                : "/api/v1/broadcast/send-single";
+
+            const response = await fetch(endpoint, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                broadcast_id: broadcastId,
+                recipient_id: recipientId,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Update button to show success
+              button.innerHTML = '<i class="fas fa-check"></i> Sent';
+              button.classList.remove("text-blue-600", "hover:text-blue-900");
+              button.classList.add("text-green-600");
+
+              // Refresh the send modal after a delay
+              setTimeout(() => {
+                showSendModal(broadcastId, broadcastType);
+              }, 2000);
+            } else {
+              // Show error and reset button
+              alert(data.error || "Failed to send message");
+              button.innerHTML = originalText;
+              button.disabled = false;
+            }
+          } catch (error) {
+            console.error("Error sending message:", error);
+            alert("An error occurred while sending the message");
+            button.innerHTML = originalText;
+            button.disabled = false;
+          }
+        }
+
+        // Modal regular import form handler
+        const modalRegularImportForm = document.getElementById(
+          "modal-regular-import-form"
+        );
+        const modalRegularImportText = document.getElementById(
+          "modal-regular-import-text"
+        );
+        const modalRegularImportSpinner = document.getElementById(
+          "modal-regular-import-spinner"
+        );
+
+        modalRegularImportForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Show loading state
+          modalRegularImportText.textContent = "Importing...";
+          modalRegularImportSpinner.classList.remove("hidden");
+          document
+            .getElementById("import-modal-error-message")
+            .classList.add("hidden");
+          document
+            .getElementById("import-modal-success-message")
+            .classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "modal-regular-broadcast-id"
+          ).value;
+          const recipientFile = document.getElementById(
+            "modal-regular-recipient-file"
+          ).files[0];
+
+          if (!recipientFile) {
+            document.getElementById("import-modal-error-message").textContent =
+              "Please select a file to upload.";
+            document
+              .getElementById("import-modal-error-message")
+              .classList.remove("hidden");
+            modalRegularImportText.textContent = "Import";
+            modalRegularImportSpinner.classList.add("hidden");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file", recipientFile);
+          formData.append("broadcast_id", broadcastId);
+
+          try {
+            const response = await fetch("/api/v1/broadcast/import-recipient", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              document.getElementById(
+                "import-modal-success-message"
+              ).textContent = "Recipients imported successfully!";
+              document
+                .getElementById("import-modal-success-message")
+                .classList.remove("hidden");
+
+              // Disable import form
+              document.getElementById(
+                "modal-regular-recipient-file"
+              ).disabled = true;
+              document.querySelector(
+                '#modal-regular-import-form button[type="submit"]'
+              ).disabled = true;
+
+              // Refresh the broadcast list after a delay
+              setTimeout(() => {
+                importModal.classList.add("hidden");
+                loadBroadcasts();
+              }, 2000);
+            } else {
+              // Show error message
+              document.getElementById(
+                "import-modal-error-message"
+              ).textContent =
+                data.meta?.message ||
+                "Failed to import recipients. Please try again.";
+              document
+                .getElementById("import-modal-error-message")
+                .classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            document.getElementById("import-modal-error-message").textContent =
+              "An error occurred. Please try again.";
+            document
+              .getElementById("import-modal-error-message")
+              .classList.remove("hidden");
+            console.error("Error importing recipients:", error);
+          } finally {
+            // Reset import button
+            modalRegularImportText.textContent = "Import";
+            modalRegularImportSpinner.classList.add("hidden");
+          }
+        });
+
+        // Modal Pecatu import form handler
+        const modalPecatuImportForm = document.getElementById(
+          "modal-pecatu-import-form"
+        );
+        const modalPecatuImportText = document.getElementById(
+          "modal-pecatu-import-text"
+        );
+        const modalPecatuImportSpinner = document.getElementById(
+          "modal-pecatu-import-spinner"
+        );
+
+        modalPecatuImportForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          // Show loading state
+          modalPecatuImportText.textContent = "Importing...";
+          modalPecatuImportSpinner.classList.remove("hidden");
+          document
+            .getElementById("import-modal-error-message")
+            .classList.add("hidden");
+          document
+            .getElementById("import-modal-success-message")
+            .classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "modal-pecatu-broadcast-id"
+          ).value;
+          const recipientFile = document.getElementById(
+            "modal-pecatu-recipient-file"
+          ).files[0];
+
+          if (!recipientFile) {
+            document.getElementById("import-modal-error-message").textContent =
+              "Please select a file to upload.";
+            document
+              .getElementById("import-modal-error-message")
+              .classList.remove("hidden");
+            modalPecatuImportText.textContent = "Import";
+            modalPecatuImportSpinner.classList.add("hidden");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file", recipientFile);
+          formData.append("broadcast_id", broadcastId);
+
+          try {
+            const response = await fetch(
+              "/api/v1/broadcast/pecatu/import-recipient",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+              }
+            );
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              document.getElementById(
+                "import-modal-success-message"
+              ).textContent = "Pecatu recipients imported successfully!";
+              document
+                .getElementById("import-modal-success-message")
+                .classList.remove("hidden");
+
+              // Disable import form
+              document.getElementById(
+                "modal-pecatu-recipient-file"
+              ).disabled = true;
+              document.querySelector(
+                '#modal-pecatu-import-form button[type="submit"]'
+              ).disabled = true;
+
+              // Refresh the broadcast list after a delay
+              setTimeout(() => {
+                importModal.classList.add("hidden");
+                loadBroadcasts();
+              }, 2000);
+            } else {
+              // Show error message
+              document.getElementById(
+                "import-modal-error-message"
+              ).textContent =
+                data.meta?.message ||
+                "Failed to import Pecatu recipients. Please try again.";
+              document
+                .getElementById("import-modal-error-message")
+                .classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            document.getElementById("import-modal-error-message").textContent =
+              "An error occurred. Please try again.";
+            document
+              .getElementById("import-modal-error-message")
+              .classList.remove("hidden");
+            console.error("Error importing Pecatu recipients:", error);
+          } finally {
+            // Reset import button
+            modalPecatuImportText.textContent = "Import";
+            modalPecatuImportSpinner.classList.add("hidden");
+          }
+        });
+
+        // Send broadcast buttons handlers
+        const sendModalRegularBtn = document.getElementById(
+          "send-modal-regular-btn"
+        );
+        const sendModalRegularText = document.getElementById(
+          "send-modal-regular-text"
+        );
+        const sendModalRegularSpinner = document.getElementById(
+          "send-modal-regular-spinner"
+        );
+
+        sendModalRegularBtn.addEventListener("click", async function () {
+          // Show loading state
+          sendModalRegularText.textContent = "Sending...";
+          sendModalRegularSpinner.classList.remove("hidden");
+          document
+            .getElementById("send-modal-error-message")
+            .classList.add("hidden");
+          document
+            .getElementById("send-modal-success-message")
+            .classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "send-modal-broadcast-id"
+          ).textContent;
+
+          try {
+            const response = await fetch("/api/v1/broadcast/send", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                broadcast_id: parseInt(broadcastId),
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              document.getElementById(
+                "send-modal-success-message"
+              ).textContent = "Regular broadcast sent successfully!";
+              document
+                .getElementById("send-modal-success-message")
+                .classList.remove("hidden");
+
+              // Disable send button
+              sendModalRegularBtn.disabled = true;
+
+              // Refresh the broadcast list after a delay
+              setTimeout(() => {
+                sendModal.classList.add("hidden");
+                loadBroadcasts();
+              }, 2000);
+            } else {
+              // Show error message
+              document.getElementById("send-modal-error-message").textContent =
+                data.error ||
+                "Failed to send regular broadcast. Please try again.";
+              document
+                .getElementById("send-modal-error-message")
+                .classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            document.getElementById("send-modal-error-message").textContent =
+              "An error occurred. Please try again.";
+            document
+              .getElementById("send-modal-error-message")
+              .classList.remove("hidden");
+            console.error("Error sending regular broadcast:", error);
+          } finally {
+            // Reset send button
+            sendModalRegularText.textContent = "Send Regular";
+            sendModalRegularSpinner.classList.add("hidden");
+          }
+        });
+
+        const sendModalPecatuBtn = document.getElementById(
+          "send-modal-pecatu-btn"
+        );
+        const sendModalPecatuText = document.getElementById(
+          "send-modal-pecatu-text"
+        );
+        const sendModalPecatuSpinner = document.getElementById(
+          "send-modal-pecatu-spinner"
+        );
+
+        sendModalPecatuBtn.addEventListener("click", async function () {
+          // Show loading state
+          sendModalPecatuText.textContent = "Sending...";
+          sendModalPecatuSpinner.classList.remove("hidden");
+          document
+            .getElementById("send-modal-error-message")
+            .classList.add("hidden");
+          document
+            .getElementById("send-modal-success-message")
+            .classList.add("hidden");
+
+          const broadcastId = document.getElementById(
+            "send-modal-broadcast-id"
+          ).textContent;
+
+          try {
+            const response = await fetch("/api/v1/broadcast/pecatu/send", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                broadcast_id: parseInt(broadcastId),
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success message
+              document.getElementById(
+                "send-modal-success-message"
+              ).textContent = "Pecatu broadcast sent successfully!";
+              document
+                .getElementById("send-modal-success-message")
+                .classList.remove("hidden");
+
+              // Disable send button
+              sendModalPecatuBtn.disabled = true;
+
+              // Refresh the broadcast list after a delay
+              setTimeout(() => {
+                sendModal.classList.add("hidden");
+                loadBroadcasts();
+              }, 2000);
+            } else {
+              // Show error message
+              document.getElementById("send-modal-error-message").textContent =
+                data.error ||
+                "Failed to send Pecatu broadcast. Please try again.";
+              document
+                .getElementById("send-modal-error-message")
+                .classList.remove("hidden");
+            }
+          } catch (error) {
+            // Show error message
+            document.getElementById("send-modal-error-message").textContent =
+              "An error occurred. Please try again.";
+            document
+              .getElementById("send-modal-error-message")
+              .classList.remove("hidden");
+            console.error("Error sending Pecatu broadcast:", error);
+          } finally {
+            // Reset send button
+            sendModalPecatuText.textContent = "Send Pecatu";
+            sendModalPecatuSpinner.classList.add("hidden");
+          }
+        });
+
+        // Modal event listeners
+        const closeDetailModalBtn = document.getElementById(
+          "close-detail-modal-btn"
+        );
+        const broadcastDetailModal = document.getElementById(
+          "broadcast-detail-modal"
+        );
+        const closeImportModalBtn = document.getElementById(
+          "close-import-modal-btn"
+        );
+        const importModal = document.getElementById("import-modal");
+        const closeSendModalBtn = document.getElementById(
+          "close-send-modal-btn"
+        );
+        const sendModal = document.getElementById("send-modal");
+
+        // Close detail modal
+        closeDetailModalBtn.addEventListener("click", () => {
+          broadcastDetailModal.classList.add("hidden");
+        });
+
+        // Close modal when clicking outside
+        broadcastDetailModal.addEventListener("click", (e) => {
+          if (e.target === broadcastDetailModal) {
+            broadcastDetailModal.classList.add("hidden");
+          }
+        });
+
+        // Close import modal
+        closeImportModalBtn.addEventListener("click", () => {
+          importModal.classList.add("hidden");
+        });
+
+        // Close modal when clicking outside
+        importModal.addEventListener("click", (e) => {
+          if (e.target === importModal) {
+            importModal.classList.add("hidden");
+          }
+        });
+
+        // Close send modal
+        closeSendModalBtn.addEventListener("click", () => {
+          sendModal.classList.add("hidden");
+        });
+
+        // Close modal when clicking outside
+        sendModal.addEventListener("click", (e) => {
+          if (e.target === sendModal) {
+            sendModal.classList.add("hidden");
+          }
+        });
+
+        // Add event listener for new broadcast button
+        document
+          .getElementById("new-broadcast-btn")
+          .addEventListener("click", () => {
+            tabCreate.click();
+          });
+
+        // Load broadcasts when the page loads
+        loadBroadcasts();
+      });
+    </script>
+  </body>
+</html>

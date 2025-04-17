@@ -251,6 +251,262 @@ func (h *BroadcastHandler) BroadcastDetail(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(response)
 }
 
+func (h *BroadcastHandler) GetAllBroadcasts(c *fiber.Ctx) error {
+	ctx := context.Background()
+
+	broadcasts, err := h.service.GetAllBroadcasts(ctx)
+	if err != nil {
+		response := helper.APIResponse("Failed to get broadcasts", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	response := helper.APIResponse("Broadcasts retrieved successfully", http.StatusOK, "OK", broadcasts)
+	return c.Status(http.StatusOK).JSON(response)
+}
+
+func (h *BroadcastHandler) GetAllRecipientByBroadcastID(c *fiber.Ctx) error {
+	ctx := context.Background()
+	broadcastID, err := strconv.Atoi(c.Params("broadcast_id"))
+	if err != nil {
+		response := helper.APIResponse("Invalid broadcast id", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	recipients, err := h.service.GetAllRecipientByBroadcastID(ctx, broadcastID)
+	if err != nil {
+		response := helper.APIResponse("Failed to get recipients", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	response := helper.APIResponse("Recipients retrieved successfully", http.StatusOK, "OK", recipients)
+	return c.Status(http.StatusOK).JSON(response)
+}
+
+// HandleSendSingleBroadcast handles sending a single regular broadcast message
+func (h *BroadcastHandler) HandleSendSingleBroadcast(c *fiber.Ctx) error {
+	ctx := context.Background()
+
+	// Parse request body
+	var input struct {
+		BroadcastID int `json:"broadcast_id"`
+		RecipientID int `json:"recipient_id"`
+	}
+
+	if err := c.BodyParser(&input); err != nil {
+		response := helper.APIResponse("Invalid request body", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Validate input
+	if input.BroadcastID <= 0 || input.RecipientID <= 0 {
+		response := helper.APIResponse("Invalid broadcast or recipient ID", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Get broadcast message
+	broadcastMessage, err := h.service.GetBroadcastMessage(ctx, input.BroadcastID)
+	if err != nil {
+		response := helper.APIResponse("Failed to get broadcast message", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	// Get recipient details
+	recipients, err := h.service.GetAllRecipientByBroadcastID(ctx, input.BroadcastID)
+	if err != nil {
+		response := helper.APIResponse("Failed to get recipient details", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	// Find the specific recipient
+	var targetRecipient map[string]interface{}
+	recipientsList, ok := recipients["recipients"].([]map[string]interface{})
+	if !ok {
+		response := helper.APIResponse("Invalid recipient data format", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	for _, recipient := range recipientsList {
+		recipientID, ok := recipient["id"].(float64)
+		if !ok {
+			continue
+		}
+
+		if int(recipientID) == input.RecipientID {
+			targetRecipient = recipient
+			break
+		}
+	}
+
+	if targetRecipient == nil {
+		response := helper.APIResponse("Recipient not found", http.StatusNotFound, "ERROR", nil)
+		return c.Status(http.StatusNotFound).JSON(response)
+	}
+
+	// Send the message
+	whatsappNumber, ok := targetRecipient["whatsapp_number"].(string)
+	if !ok || whatsappNumber == "" {
+		response := helper.APIResponse("Invalid recipient phone number", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	message, ok := broadcastMessage["broadcast_message"].(string)
+	if !ok || message == "" {
+		response := helper.APIResponse("Invalid broadcast message", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Send the message using the WhatsApp client
+	recipient, err := types.ParseJID(whatsappNumber + "@s.whatsapp.net")
+	if err != nil {
+		response := helper.APIResponse("Invalid phone number format", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Send the message
+	msg := &waProto.Message{
+		Conversation: proto.String(message),
+	}
+
+	sendResult, err := h.client.SendMessage(ctx, recipient, msg)
+	if err != nil {
+		// Update recipient status to Failed
+		_, updateErr := h.service.UpdateRecipientBroadcastStatus(ctx, input.RecipientID, input.BroadcastID, "Failed")
+		if updateErr != nil {
+			// Log the error but don't fail the request
+			fmt.Printf("Failed to update recipient status to Failed: %v\n", updateErr)
+		}
+
+		response := helper.APIResponse("Failed to send message: "+err.Error(), http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	// Update recipient status
+	_, err = h.service.UpdateRecipientBroadcastStatus(ctx, input.RecipientID, input.BroadcastID, "Success")
+	if err != nil {
+		// Log the error but don't fail the request
+		fmt.Printf("Failed to update recipient status: %v\n", err)
+	}
+
+	response := helper.APIResponse("Message sent successfully", http.StatusOK, "OK", sendResult)
+	return c.Status(http.StatusOK).JSON(response)
+}
+
+// HandleSendSinglePecatuBroadcast handles sending a single Pecatu broadcast message
+func (h *BroadcastHandler) HandleSendSinglePecatuBroadcast(c *fiber.Ctx) error {
+	ctx := context.Background()
+
+	// Parse request body
+	var input struct {
+		BroadcastID int `json:"broadcast_id"`
+		RecipientID int `json:"recipient_id"`
+	}
+
+	if err := c.BodyParser(&input); err != nil {
+		response := helper.APIResponse("Invalid request body", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Validate input
+	if input.BroadcastID <= 0 || input.RecipientID <= 0 {
+		response := helper.APIResponse("Invalid broadcast or recipient ID", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Get broadcast message
+	broadcastMessage, err := h.service.GetBroadcastMessage(ctx, input.BroadcastID)
+	if err != nil {
+		response := helper.APIResponse("Failed to get broadcast message", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	// Get recipient details
+	recipients, err := h.service.GetAllRecipientByBroadcastID(ctx, input.BroadcastID)
+	if err != nil {
+		response := helper.APIResponse("Failed to get recipient details", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	// Find the specific recipient
+	var targetRecipient map[string]interface{}
+	recipientsList, ok := recipients["recipients"].([]map[string]interface{})
+	if !ok {
+		response := helper.APIResponse("Invalid recipient data format", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	for _, recipient := range recipientsList {
+		recipientID, ok := recipient["id"].(float64)
+		if !ok {
+			continue
+		}
+
+		if int(recipientID) == input.RecipientID {
+			targetRecipient = recipient
+			break
+		}
+	}
+
+	if targetRecipient == nil {
+		response := helper.APIResponse("Recipient not found", http.StatusNotFound, "ERROR", nil)
+		return c.Status(http.StatusNotFound).JSON(response)
+	}
+
+	// Get recipient details for Pecatu
+	whatsappNumber, ok := targetRecipient["whatsapp_number"].(string)
+	if !ok || whatsappNumber == "" {
+		response := helper.APIResponse("Invalid recipient phone number", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	recipientName, _ := targetRecipient["recipient_name"].(string)
+	recipientIdentifier, _ := targetRecipient["recipient_unique_identifier"].(string)
+
+	message, ok := broadcastMessage["broadcast_message"].(string)
+	if !ok || message == "" {
+		response := helper.APIResponse("Invalid broadcast message", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Replace placeholders in the message
+	message = strings.Replace(message, "{{name}}", recipientName, -1)
+	message = strings.Replace(message, "{{identifier}}", recipientIdentifier, -1)
+
+	// Send the message using the WhatsApp client
+	recipient, err := types.ParseJID(whatsappNumber + "@s.whatsapp.net")
+	if err != nil {
+		response := helper.APIResponse("Invalid phone number format", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Send the message
+	msg := &waProto.Message{
+		Conversation: proto.String(message),
+	}
+
+	sendResult, err := h.client.SendMessage(ctx, recipient, msg)
+	if err != nil {
+		// Update recipient status to Failed
+		_, updateErr := h.service.UpdateRecipientBroadcastStatus(ctx, input.RecipientID, input.BroadcastID, "Failed")
+		if updateErr != nil {
+			// Log the error but don't fail the request
+			fmt.Printf("Failed to update recipient status to Failed: %v\n", updateErr)
+		}
+
+		response := helper.APIResponse("Failed to send message: "+err.Error(), http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	// Update recipient status
+	_, err = h.service.UpdateRecipientBroadcastStatus(ctx, input.RecipientID, input.BroadcastID, "Success")
+	if err != nil {
+		// Log the error but don't fail the request
+		fmt.Printf("Failed to update recipient status: %v\n", err)
+	}
+
+	response := helper.APIResponse("Pecatu message sent successfully", http.StatusOK, "OK", sendResult)
+	return c.Status(http.StatusOK).JSON(response)
+}
+
 func (h *BroadcastHandler) HandleSendBroadcast(c *fiber.Ctx) error {
 	// Check if client is logged in
 	if h.client.Store.ID == nil {
@@ -448,11 +704,19 @@ func (h *BroadcastHandler) HandlePecatuBroadcast(c *fiber.Ctx) error {
 		})
 	}
 
-	// Get recipients by broadcast ID
-	recipients, err := h.service.GetAllRecipientByBroadcastID(ctx, broadcastID)
+	// Get only pending recipients by broadcast ID
+	recipients, err := h.service.GetPendingRecipientsByBroadcastID(ctx, broadcastID)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"error": "Failed to get recipients",
+			"error": "Failed to get pending recipients",
+		})
+	}
+
+	// Check if there are any pending recipients
+	pendingRecipients, ok := recipients["recipients"].([]map[string]interface{})
+	if !ok || len(pendingRecipients) == 0 {
+		return c.Status(200).JSON(fiber.Map{
+			"message": "No pending recipients to send broadcast",
 		})
 	}
 
@@ -466,9 +730,9 @@ func (h *BroadcastHandler) HandlePecatuBroadcast(c *fiber.Ctx) error {
 
 	// Start the background process
 	go func() {
-		ch := make(chan error, len(recipients["recipients"].([]map[string]interface{})))
+		ch := make(chan error, len(pendingRecipients))
 
-		for _, recipient := range recipients["recipients"].([]map[string]interface{}) {
+		for _, recipient := range pendingRecipients {
 			recipientID, ok := recipient["id"].(int)
 			if !ok {
 				ch <- fmt.Errorf("recipient ID is not an integer")
@@ -532,15 +796,36 @@ func (h *BroadcastHandler) HandlePecatuBroadcast(c *fiber.Ctx) error {
 				}
 			}
 
-			// Mengirim pesan
-			_, err = h.client.SendMessage(ctx, recipientJID, msg)
-			if err != nil {
-				// Jika pengiriman pesan gagal, lanjutkan ke penerima berikutnya dan update status menjadi gagal
+			// Create a context with timeout for message sending (15 seconds)
+			sendCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+			defer cancel()
+
+			// Send message with timeout
+			sendChan := make(chan error, 1)
+			go func() {
+				_, err := h.client.SendMessage(sendCtx, recipientJID, msg)
+				sendChan <- err
+			}()
+
+			// Wait for either message to be sent or timeout
+			var sendErr error
+			select {
+			case sendErr = <-sendChan:
+				// Message sending completed (success or error)
+			case <-sendCtx.Done():
+				// Timeout occurred
+				sendErr = fmt.Errorf("message sending timed out after 15 seconds")
+			}
+
+			// Handle errors (including timeout)
+			if sendErr != nil {
+				fmt.Printf("Failed to send message to %s: %v\n", whatsappNumber, sendErr)
+				// Update recipient status to Failed
 				_, errUpdate := h.service.UpdateRecipientBroadcastStatus(ctx, recipientID, broadcastID, "Failed")
 				if errUpdate != nil {
-					ch <- fmt.Errorf("failed to update recipient broadcast status to failed: %v", errUpdate)
-					return
+					fmt.Printf("Failed to update recipient status to Failed: %v\n", errUpdate)
 				}
+				// Continue to next recipient
 				continue
 			}
 

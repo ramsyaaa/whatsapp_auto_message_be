@@ -38,13 +38,21 @@ func (s *service) GetAllRecipientByBroadcastID(ctx context.Context, broadcastID 
 	return s.repo.GetAllRecipientByBroadcastID(ctx, broadcastID)
 }
 
+func (s *service) GetPendingRecipientsByBroadcastID(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
+	return s.repo.GetPendingRecipientsByBroadcastID(ctx, broadcastID)
+}
+
 func (s *service) UpdateBroadcastStatus(ctx context.Context, broadcastID int, status string) (map[string]interface{}, error) {
 	return s.repo.UpdateBroadcastStatus(ctx, broadcastID, status)
 }
 
-func (s *service) UpdateRecipientBroadcastStatus(ctx context.Context, broadcastID int, recipientID int, status string) (map[string]interface{}, error) {
-	return s.repo.UpdateRecipientBroadcastStatus(ctx, broadcastID, recipientID, status)
+func (s *service) UpdateRecipientBroadcastStatus(ctx context.Context, recipientID int, broadcastID int, status string) (map[string]interface{}, error) {
+	return s.repo.UpdateRecipientBroadcastStatus(ctx, recipientID, broadcastID, status)
 }
 func (s *service) IsAnyRecipientInBroadcast(ctx context.Context, broadcastID int) (bool, error) {
 	return s.repo.IsAnyRecipientInBroadcast(ctx, broadcastID)
+}
+
+func (s *service) GetAllBroadcasts(ctx context.Context) ([]map[string]interface{}, error) {
+	return s.repo.GetAllBroadcasts(ctx)
 }

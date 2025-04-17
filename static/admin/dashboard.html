@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - WhatsApp Messaging System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="hidden md:flex md:flex-shrink-0">
+            <div class="flex flex-col w-64 bg-gray-800">
+                <div class="flex items-center justify-center h-16 bg-gray-900">
+                    <span class="text-white font-bold text-lg">WhatsApp Admin</span>
+                </div>
+                <div class="flex flex-col flex-grow overflow-y-auto">
+                    <nav class="flex-1 px-2 py-4 space-y-1">
+                        <a href="/admin/dashboard" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                        <a href="/admin/messaging" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
+                            <i class="fas fa-comment mr-3"></i>
+                            Messaging
+                        </a>
+                        <a href="/admin/broadcast" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
+                            <i class="fas fa-bullhorn mr-3"></i>
+                            Broadcast
+                        </a>
+                    </nav>
+                </div>
+                <div class="p-4 bg-gray-700">
+                    <button id="logout-btn" class="flex items-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md">
+                        <i class="fas fa-sign-out-alt mr-3"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile sidebar -->
+        <div class="md:hidden fixed inset-0 z-40 flex" id="mobile-sidebar" style="display: none;">
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-75" id="sidebar-backdrop"></div>
+            <div class="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
+                <div class="absolute top-0 right-0 -mr-12 pt-2">
+                    <button id="close-sidebar-btn" class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                        <span class="sr-only">Close sidebar</span>
+                        <i class="fas fa-times text-white"></i>
+                    </button>
+                </div>
+                <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+                    <div class="flex-shrink-0 flex items-center px-4">
+                        <span class="text-white font-bold text-lg">WhatsApp Admin</span>
+                    </div>
+                    <nav class="mt-5 px-2 space-y-1">
+                        <a href="/admin/dashboard" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md">
+                            <i class="fas fa-tachometer-alt mr-3"></i>
+                            Dashboard
+                        </a>
+                        <a href="/admin/messaging" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
+                            <i class="fas fa-comment mr-3"></i>
+                            Messaging
+                        </a>
+                        <a href="/admin/broadcast" class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
+                            <i class="fas fa-bullhorn mr-3"></i>
+                            Broadcast
+                        </a>
+                    </nav>
+                </div>
+                <div class="p-4 bg-gray-700">
+                    <button id="mobile-logout-btn" class="flex items-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md">
+                        <i class="fas fa-sign-out-alt mr-3"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+            <div class="flex-shrink-0 w-14"></div>
+        </div>
+
+        <!-- Main content -->
+        <div class="flex flex-col flex-1 overflow-hidden">
+            <!-- Top navbar -->
+            <div class="flex items-center justify-between h-16 bg-white shadow-sm px-6">
+                <button id="open-sidebar-btn" class="md:hidden text-gray-500 focus:outline-none">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="flex items-center">
+                    <span id="user-name" class="text-sm font-medium text-gray-700 mr-2">Admin User</span>
+                    <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
+                        <i class="fas fa-user text-gray-600"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main content area -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <div class="mb-6">
+                    <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+                    <p class="text-gray-600">Welcome to the WhatsApp Messaging System Admin Dashboard</p>
+                </div>
+
+                <!-- WhatsApp Connection Status -->
+                <div class="mb-6 bg-white shadow rounded-lg p-4">
+                    <h2 class="text-lg font-semibold text-gray-700 mb-2">WhatsApp Connection Status</h2>
+                    <div id="whatsapp-status" class="flex items-center">
+                        <div id="status-indicator" class="h-4 w-4 rounded-full bg-gray-300 mr-2"></div>
+                        <span id="status-text">Checking connection...</span>
+                    </div>
+                    <div class="mt-4">
+                        <button id="scan-qr-btn" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 hidden">
+                            <i class="fas fa-qrcode mr-2"></i>
+                            Scan QR Code
+                        </button>
+                        <button id="logout-whatsapp-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 hidden">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Logout WhatsApp
+                        </button>
+                    </div>
+                    <div id="qr-container" class="mt-4 hidden">
+                        <img id="qr-code" src="" alt="QR Code" class="mx-auto">
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white shadow rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-500">
+                                <i class="fas fa-comment text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Total Messages</p>
+                                <p id="total-messages" class="text-2xl font-semibold text-gray-900">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white shadow rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-green-100 text-green-500">
+                                <i class="fas fa-bullhorn text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Total Broadcasts</p>
+                                <p id="total-broadcasts" class="text-2xl font-semibold text-gray-900">--</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white shadow rounded-lg p-4">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-500">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Total Recipients</p>
+                                <p id="total-recipients" class="text-2xl font-semibold text-gray-900">--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white shadow rounded-lg p-4">
+                        <h2 class="text-lg font-semibold text-gray-700 mb-4">Message Activity</h2>
+                        <canvas id="message-chart" height="200"></canvas>
+                    </div>
+                    <div class="bg-white shadow rounded-lg p-4">
+                        <h2 class="text-lg font-semibold text-gray-700 mb-4">Broadcast Status</h2>
+                        <canvas id="broadcast-chart" height="200"></canvas>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is logged in
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin';
+                return;
+            }
+
+            // Set user name
+            const user = JSON.parse(localStorage.getItem('admin_user') || '{}');
+            document.getElementById('user-name').textContent = user.name || 'Admin User';
+
+            // Mobile sidebar toggle
+            const mobileSidebar = document.getElementById('mobile-sidebar');
+            const openSidebarBtn = document.getElementById('open-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+            openSidebarBtn.addEventListener('click', () => {
+                mobileSidebar.style.display = 'flex';
+            });
+
+            closeSidebarBtn.addEventListener('click', () => {
+                mobileSidebar.style.display = 'none';
+            });
+
+            sidebarBackdrop.addEventListener('click', () => {
+                mobileSidebar.style.display = 'none';
+            });
+
+            // Logout functionality
+            const logoutBtn = document.getElementById('logout-btn');
+            const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+
+            function handleLogout() {
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_user');
+                window.location.href = '/admin';
+            }
+
+            logoutBtn.addEventListener('click', handleLogout);
+            mobileLogoutBtn.addEventListener('click', handleLogout);
+
+            // Check WhatsApp connection status
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+            const scanQrBtn = document.getElementById('scan-qr-btn');
+            const logoutWhatsappBtn = document.getElementById('logout-whatsapp-btn');
+            const qrContainer = document.getElementById('qr-container');
+            const qrCode = document.getElementById('qr-code');
+
+            async function checkWhatsAppStatus() {
+                try {
+                    const response = await fetch('/api/v1/authenticate', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.meta.status === 'OK') {
+                        // Connected
+                        statusIndicator.classList.remove('bg-gray-300', 'bg-red-500');
+                        statusIndicator.classList.add('bg-green-500');
+                        statusText.textContent = 'Connected to WhatsApp';
+                        scanQrBtn.classList.add('hidden');
+                        logoutWhatsappBtn.classList.remove('hidden');
+                        qrContainer.classList.add('hidden');
+                    } else {
+                        // Not connected
+                        statusIndicator.classList.remove('bg-gray-300', 'bg-green-500');
+                        statusIndicator.classList.add('bg-red-500');
+                        statusText.textContent = 'Not connected to WhatsApp';
+                        scanQrBtn.classList.remove('hidden');
+                        logoutWhatsappBtn.classList.add('hidden');
+                    }
+                } catch (error) {
+                    // Error checking status
+                    statusIndicator.classList.remove('bg-green-500', 'bg-red-500');
+                    statusIndicator.classList.add('bg-gray-300');
+                    statusText.textContent = 'Error checking WhatsApp connection';
+                    console.error('Error checking WhatsApp status:', error);
+                }
+            }
+
+            // Scan QR code
+            scanQrBtn.addEventListener('click', async () => {
+                try {
+                    qrContainer.classList.remove('hidden');
+                    qrCode.src = '/api/v1/authenticate';
+                } catch (error) {
+                    console.error('Error getting QR code:', error);
+                }
+            });
+
+            // Logout WhatsApp
+            logoutWhatsappBtn.addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/v1/log-out', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        checkWhatsAppStatus();
+                    }
+                } catch (error) {
+                    console.error('Error logging out from WhatsApp:', error);
+                }
+            });
+
+            // Initialize charts
+            const messageCtx = document.getElementById('message-chart').getContext('2d');
+            const broadcastCtx = document.getElementById('broadcast-chart').getContext('2d');
+
+            const messageChart = new Chart(messageCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+                    datasets: [{
+                        label: 'Messages Sent',
+                        data: [12, 19, 3, 5, 2, 3, 7],
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 2,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            const broadcastChart = new Chart(broadcastCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Delivered', 'Pending', 'Failed'],
+                    datasets: [{
+                        data: [70, 20, 10],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(239, 68, 68, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            // Check WhatsApp status on page load
+            checkWhatsAppStatus();
+        });
+    </script>
+</body>
+</html>

@@ -6,4 +6,5 @@ import (
 
 func MessagingRoutes(app *fiber.App, handler *MessagingHandler) {
 	app.Post("/send-message", handler.HandleSendMessage)
+	app.Get("/recent-messages", handler.GetRecentMessages)
 }

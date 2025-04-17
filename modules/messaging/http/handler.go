@@ -3,6 +3,8 @@ package http
 import (
 	"context"
 	"fmt"
+	"go_whatsapp/helper"
+	"go_whatsapp/modules/messaging/service"
 	"io"
 	"net/http"
 	"strings"
@@ -17,12 +19,14 @@ import (
 )
 
 type MessagingHandler struct {
-	client *whatsmeow.Client
+	client  *whatsmeow.Client
+	service service.MessageService
 }
 
-func NewMessagingHandler(client *whatsmeow.Client) *MessagingHandler {
+func NewMessagingHandler(client *whatsmeow.Client, service service.MessageService) *MessagingHandler {
 	return &MessagingHandler{
-		client: client,
+		client:  client,
+		service: service,
 	}
 }
 
@@ -42,17 +46,13 @@ type SendMessagePayload struct {
 func (h *MessagingHandler) HandleSendMessage(c *fiber.Ctx) error {
 	// Check if client is logged in
 	if h.client.Store.ID == nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "Please login first",
-		})
+		return c.Status(400).JSON(helper.APIResponse("Please login first", http.StatusBadRequest, "ERROR", nil))
 	}
 
 	// Parse the payload
 	payload := new(SendMessagePayload)
 	if err := c.BodyParser(payload); err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "Invalid payload",
-		})
+		return c.Status(400).JSON(helper.APIResponse("Invalid payload", http.StatusBadRequest, "ERROR", nil))
 	}
 
 	// Format number (should start with '62' for Indonesia)
@@ -109,24 +109,41 @@ func (h *MessagingHandler) HandleSendMessage(c *fiber.Ctx) error {
 	if !h.client.IsConnected() {
 		err := h.client.Connect()
 		if err != nil {
-			return c.Status(500).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to connect to WhatsApp: %v", err),
-			})
+			return c.Status(500).JSON(helper.APIResponse(fmt.Sprintf("Failed to connect to WhatsApp: %v", err), http.StatusInternalServerError, "ERROR", nil))
 		}
 	}
 
 	// Send the message
 	_, err := h.client.SendMessage(ctx, recipient, msg)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{
-			"error": fmt.Sprintf("Failed to send message: %v", err),
-		})
+		return c.Status(500).JSON(helper.APIResponse(fmt.Sprintf("Failed to send message: %v", err), http.StatusInternalServerError, "ERROR", nil))
 	}
 
-	return c.JSON(fiber.Map{
-		"message": "Message sent successfully",
-		"to":      number,
-	})
+	// Save message to database
+	message, err := h.service.SaveMessage(ctx, number, payload.Message)
+	if err != nil {
+		// Log the error but don't fail the request
+		fmt.Printf("Failed to save message to database: %v\n", err)
+	}
+
+	return c.Status(200).JSON(helper.APIResponse("Message sent successfully", http.StatusOK, "SUCCESS", fiber.Map{
+		"message_id": message.ID,
+		"to":         number,
+		"sent_at":    message.SentAt,
+	}))
+}
+
+// Get recent messages
+func (h *MessagingHandler) GetRecentMessages(c *fiber.Ctx) error {
+	ctx := context.Background()
+	
+	// Get recent messages from database
+	messages, err := h.service.GetRecentMessages(ctx, 10) // Get last 10 messages
+	if err != nil {
+		return c.Status(500).JSON(helper.APIResponse(fmt.Sprintf("Failed to get recent messages: %v", err), http.StatusInternalServerError, "ERROR", nil))
+	}
+	
+	return c.Status(200).JSON(helper.APIResponse("Recent messages retrieved successfully", http.StatusOK, "SUCCESS", messages))
 }
 
 // Utility function to check for URLs in the message
