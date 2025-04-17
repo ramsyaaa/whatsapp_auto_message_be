@@ -12,6 +12,44 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
     />
+    <!-- DataTables CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css"
+    />
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <style>
+      /* Custom styles to make DataTables work with Tailwind */
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_processing,
+      .dataTables_wrapper .dataTables_paginate {
+        color: #4b5563;
+        margin-bottom: 1rem;
+      }
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #4f46e5 !important;
+        color: white !important;
+        border: 1px solid #4f46e5 !important;
+      }
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #6366f1 !important;
+        color: white !important;
+        border: 1px solid #6366f1 !important;
+      }
+      table.dataTable tbody tr.selected {
+        background-color: #e0e7ff !important;
+      }
+    </style>
   </head>
   <body class="bg-gray-100">
     <div class="min-h-screen flex flex-col">
@@ -179,44 +217,42 @@
               </div>
             </div>
             <div class="border-t border-gray-200">
-              <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+              <div class="overflow-x-auto p-4">
+                <table
+                  id="recipients-table"
+                  class="min-w-full divide-y divide-gray-200 stripe hover"
+                  style="width: 100%"
+                >
                   <thead class="bg-gray-50">
                     <tr>
                       <th
-                        scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Number
                       </th>
                       <th
-                        scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Recipient Name
                       </th>
                       <th
                         id="identifier-header"
-                        scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden"
                       >
                         Identifier
                       </th>
                       <th
-                        scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Status
                       </th>
                       <th
-                        scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
                         Sent At
                       </th>
                       <th
-                        scope="col"
-                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider no-sort"
                       >
                         Action
                       </th>
@@ -237,67 +273,7 @@
                   </tbody>
                 </table>
               </div>
-              <!-- Pagination Controls -->
-              <div
-                id="pagination-controls"
-                class="px-6 py-4 flex items-center justify-between border-t border-gray-200"
-              >
-                <div class="flex-1 flex justify-between sm:hidden">
-                  <button
-                    id="mobile-prev-page"
-                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    id="mobile-next-page"
-                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    Next
-                  </button>
-                </div>
-                <div
-                  class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p id="pagination-info" class="text-sm text-gray-700">
-                      Showing
-                      <span class="font-medium" id="pagination-start">1</span>
-                      to
-                      <span class="font-medium" id="pagination-end">10</span> of
-                      <span class="font-medium" id="pagination-total">0</span>
-                      results
-                    </p>
-                  </div>
-                  <div>
-                    <nav
-                      class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
-                      aria-label="Pagination"
-                    >
-                      <button
-                        id="prev-page"
-                        class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                      >
-                        <span class="sr-only">Previous</span>
-                        <i class="fas fa-chevron-left"></i>
-                      </button>
-                      <div
-                        id="page-numbers"
-                        class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
-                      >
-                        <!-- Page numbers will be inserted here -->
-                      </div>
-                      <button
-                        id="next-page"
-                        class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                      >
-                        <span class="sr-only">Next</span>
-                        <i class="fas fa-chevron-right"></i>
-                      </button>
-                    </nav>
-                  </div>
-                </div>
-              </div>
+              <!-- We don't need custom pagination controls anymore as DataTables provides its own -->
             </div>
           </div>
         </div>
@@ -338,64 +314,17 @@
           return;
         }
 
-        // Set up search functionality
+        // We don't need custom search and pagination controls anymore as DataTables provides its own
+        // Hide the custom search box since DataTables has its own
         const searchInput = document.getElementById("search-input");
         const searchButton = document.getElementById("search-button");
-
-        searchButton.addEventListener("click", function () {
-          currentSearch = searchInput.value.trim();
-          currentPage = 1; // Reset to first page when searching
-          loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
-        });
-
-        searchInput.addEventListener("keyup", function (event) {
-          if (event.key === "Enter") {
-            currentSearch = searchInput.value.trim();
-            currentPage = 1; // Reset to first page when searching
-            loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
-          }
-        });
-
-        // Set up pagination controls
-        document
-          .getElementById("prev-page")
-          .addEventListener("click", function () {
-            if (currentPage > 1) {
-              currentPage--;
-              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
-            }
-          });
-
-        document
-          .getElementById("next-page")
-          .addEventListener("click", function () {
-            if (currentPage < totalPages) {
-              currentPage++;
-              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
-            }
-          });
-
-        document
-          .getElementById("mobile-prev-page")
-          .addEventListener("click", function () {
-            if (currentPage > 1) {
-              currentPage--;
-              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
-            }
-          });
-
-        document
-          .getElementById("mobile-next-page")
-          .addEventListener("click", function () {
-            if (currentPage < totalPages) {
-              currentPage++;
-              loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
-            }
-          });
+        if (searchInput && searchInput.parentNode) {
+          searchInput.parentNode.parentNode.style.display = "none";
+        }
 
         // Load broadcast details and recipients
         await loadBroadcastDetails(broadcastId);
-        await loadRecipients(broadcastId, currentPage, pageSize, currentSearch);
+        await loadRecipients(broadcastId);
 
         // Set up event listeners for send buttons
         document
@@ -493,47 +422,32 @@
         }
       }
 
-      // Global variables for pagination
-      let currentPage = 1;
-      let pageSize = 10;
-      let totalPages = 1;
-      let currentSearch = "";
+      // DataTable instance
+      let recipientsTable;
 
-      // Load recipients with pagination and search
-      async function loadRecipients(
-        broadcastId,
-        page = 1,
-        limit = 10,
-        search = ""
-      ) {
-        const recipientsList = document.getElementById("recipients-list");
-        // We no longer need nameHeader since it's always visible
-        const identifierHeader = document.getElementById("identifier-header");
-        const paginationControls = document.getElementById(
-          "pagination-controls"
-        );
-
-        // Update current page
-        currentPage = page;
-        pageSize = limit;
-        currentSearch = search;
-
+      // Load recipients with DataTables
+      async function loadRecipients(broadcastId) {
         try {
           console.log("Loading recipients with token:", token);
-          console.log("Page:", page, "Limit:", limit, "Search:", search);
 
-          // Build URL with query parameters
-          let url = `/api/v1/broadcast/recipients/${broadcastId}?page=${page}&limit=${limit}`;
-          if (search) {
-            url += `&search=${encodeURIComponent(search)}`;
-          }
+          // Show loading message
+          document.getElementById("recipients-list").innerHTML = `
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                Loading recipients...
+              </td>
+            </tr>
+          `;
 
-          // Fetch recipients from API
-          const response = await fetch(url, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
+          // Fetch all recipients from API (DataTables will handle pagination)
+          const response = await fetch(
+            `/api/v1/broadcast/recipients/${broadcastId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
           console.log("Recipients response status:", response.status);
 
@@ -547,20 +461,6 @@
           // Get recipients from response data
           const recipients = data.data?.recipients || [];
 
-          // Get pagination data if available
-          const pagination = data.data?.pagination || {
-            total_count: recipients.length,
-            total_pages: 1,
-            current_page: 1,
-            limit: 10,
-          };
-
-          // Update pagination variables
-          totalPages = pagination.total_pages;
-
-          // Update pagination UI
-          updatePaginationUI(pagination);
-
           // Determine broadcast type based on recipients if not already set
           if (!window.broadcastType) {
             window.broadcastType = "regular";
@@ -573,112 +473,109 @@
           }
 
           // Show/hide Pecatu-specific columns based on broadcast type
+          const identifierHeader = document.getElementById("identifier-header");
           if (window.broadcastType === "pecatu" && identifierHeader) {
-            // Only toggle the identifier header since name is always shown
             identifierHeader.classList.remove("hidden");
           } else if (identifierHeader) {
             identifierHeader.classList.add("hidden");
           }
 
-          // Update recipients table
-          if (recipients.length === 0) {
-            // Calculate colspan: Number + Name + Status + Sent At + Action + (Identifier if pecatu)
-            const colSpan = window.broadcastType === "pecatu" ? 6 : 5;
-            recipientsList.innerHTML = `<tr><td colspan="${colSpan}" class="px-6 py-4 text-center text-sm text-gray-500">No recipients found</td></tr>`;
-          } else {
-            recipientsList.innerHTML = "";
-            recipients.forEach((recipient) => {
-              const row = document.createElement("tr");
-
-              // Status badge color
-              let statusClass = "bg-gray-100 text-gray-800";
-              if (recipient.broadcast_status === "Success") {
-                statusClass = "bg-green-100 text-green-800";
-              } else if (recipient.broadcast_status === "Pending") {
-                statusClass = "bg-yellow-100 text-yellow-800";
-              } else if (recipient.broadcast_status === "Failed") {
-                statusClass = "bg-red-100 text-red-800";
-              }
-
-              // Basic recipient info
-              let rowHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${recipient.whatsapp_number}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${recipient.recipient_name || "-"}
-                </td>`;
-
-              // Add Pecatu-specific columns if this is a Pecatu broadcast
-              if (window.broadcastType === "pecatu") {
-                rowHTML += `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${recipient.recipient_unique_identifier || "-"}
-                </td>`;
-              }
-
-              // Add status column
-              rowHTML += `
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
-                        ${recipient.broadcast_status || "Pending"}
-                    </span>
-                </td>`;
-
-              // Format broadcast_at date if available
-              let broadcastAtText = "-";
-              if (recipient.broadcast_at) {
-                // Use the date directly from the database without conversion
-                broadcastAtText = recipient.broadcast_at;
-              }
-
-              // Add broadcast_at column
-              rowHTML += `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${broadcastAtText}
-                </td>`;
-
-              // Add action column
-              rowHTML += `
-                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                    ${
-                      recipient.broadcast_status === "Success"
-                        ? `<span class="text-green-600"><i class="fas fa-check"></i> Sent</span>`
-                        : `<div class="flex space-x-2">
-                            <button class="text-indigo-600 hover:text-indigo-900 send-single" data-id="${recipient.id}" data-broadcast-id="${broadcastId}" data-type="regular">
-                                <i class="fas fa-paper-plane"></i> Regular
-                            </button>
-                            <button class="text-purple-600 hover:text-purple-900 send-single" data-id="${recipient.id}" data-broadcast-id="${broadcastId}" data-type="pecatu">
-                                <i class="fas fa-paper-plane"></i> Pecatu
-                            </button>
-                          </div>`
-                    }
-                </td>`;
-
-              row.innerHTML = rowHTML;
-              recipientsList.appendChild(row);
-            });
-
-            // Add event listeners to send single buttons
-            document.querySelectorAll(".send-single").forEach((button) => {
-              button.addEventListener("click", () => {
-                const recipientId = button.getAttribute("data-id");
-                const broadcastId = button.getAttribute("data-broadcast-id");
-                const broadcastType = button.getAttribute("data-type");
-                sendSingleMessage(
-                  recipientId,
-                  broadcastId,
-                  broadcastType,
-                  button
-                );
-              });
-            });
+          // If DataTable already exists, destroy it first
+          if (recipientsTable) {
+            recipientsTable.destroy();
           }
+
+          // Prepare data for DataTables
+          const tableData = recipients.map((recipient) => {
+            // Status badge color
+            let statusClass = "bg-gray-100 text-gray-800";
+            if (recipient.broadcast_status === "Success") {
+              statusClass = "bg-green-100 text-green-800";
+            } else if (recipient.broadcast_status === "Pending") {
+              statusClass = "bg-yellow-100 text-yellow-800";
+            } else if (recipient.broadcast_status === "Failed") {
+              statusClass = "bg-red-100 text-red-800";
+            }
+
+            // Format broadcast_at date if available
+            let broadcastAtText = "-";
+            if (recipient.broadcast_at) {
+              broadcastAtText = recipient.broadcast_at;
+            }
+
+            // Action column content
+            const actionContent =
+              recipient.broadcast_status === "Success"
+                ? `<span class="text-green-600"><i class="fas fa-check"></i> Sent</span>`
+                : `<div class="flex space-x-2">
+                  <button class="text-indigo-600 hover:text-indigo-900 send-single" data-id="${recipient.id}" data-broadcast-id="${broadcastId}" data-type="regular">
+                    <i class="fas fa-paper-plane"></i> Regular
+                  </button>
+                  <button class="text-purple-600 hover:text-purple-900 send-single" data-id="${recipient.id}" data-broadcast-id="${broadcastId}" data-type="pecatu">
+                    <i class="fas fa-paper-plane"></i> Pecatu
+                  </button>
+                </div>`;
+
+            // Return array of column values
+            const row = [
+              recipient.whatsapp_number,
+              recipient.recipient_name || "-",
+              recipient.recipient_unique_identifier || "-",
+              `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${
+                recipient.broadcast_status || "Pending"
+              }</span>`,
+              broadcastAtText,
+              actionContent,
+            ];
+
+            return row;
+          });
+
+          // Initialize DataTable
+          recipientsTable = $("#recipients-table").DataTable({
+            data: tableData,
+            responsive: true,
+            columnDefs: [
+              { targets: 2, visible: window.broadcastType === "pecatu" }, // Identifier column
+              { targets: 5, orderable: false }, // Action column not sortable
+            ],
+            language: {
+              search: "Search:",
+              lengthMenu: "Show _MENU_ entries",
+              info: "Showing _START_ to _END_ of _TOTAL_ entries",
+              paginate: {
+                first: "First",
+                last: "Last",
+                next: "Next",
+                previous: "Previous",
+              },
+            },
+            drawCallback: function () {
+              // Add event listeners to send single buttons after table is drawn
+              document.querySelectorAll(".send-single").forEach((button) => {
+                button.addEventListener("click", () => {
+                  const recipientId = button.getAttribute("data-id");
+                  const broadcastId = button.getAttribute("data-broadcast-id");
+                  const broadcastType = button.getAttribute("data-type");
+                  sendSingleMessage(
+                    recipientId,
+                    broadcastId,
+                    broadcastType,
+                    button
+                  );
+                });
+              });
+            },
+          });
         } catch (error) {
           console.error("Error loading recipients:", error);
-          // Calculate colspan: Number + Name + Status + Sent At + Action + (Identifier if pecatu)
-          const errorColSpan = window.broadcastType === "pecatu" ? 6 : 5;
-          recipientsList.innerHTML = `<tr><td colspan="${errorColSpan}" class="px-6 py-4 text-center text-sm text-gray-500">Error loading recipients: ${error.message}</td></tr>`;
+          document.getElementById("recipients-list").innerHTML = `
+            <tr>
+              <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                Error loading recipients: ${error.message}
+              </td>
+            </tr>
+          `;
         }
       }
 
@@ -792,71 +689,7 @@
         }
       }
 
-      // Update pagination UI
-      function updatePaginationUI(pagination) {
-        const paginationInfo = document.getElementById("pagination-info");
-        const paginationStart = document.getElementById("pagination-start");
-        const paginationEnd = document.getElementById("pagination-end");
-        const paginationTotal = document.getElementById("pagination-total");
-        const pageNumbers = document.getElementById("page-numbers");
-        const prevPageBtn = document.getElementById("prev-page");
-        const nextPageBtn = document.getElementById("next-page");
-        const mobilePrevPageBtn = document.getElementById("mobile-prev-page");
-        const mobileNextPageBtn = document.getElementById("mobile-next-page");
-
-        // Update pagination info
-        const start = (pagination.current_page - 1) * pagination.limit + 1;
-        const end = Math.min(
-          start + pagination.limit - 1,
-          pagination.total_count
-        );
-
-        paginationStart.textContent = pagination.total_count > 0 ? start : 0;
-        paginationEnd.textContent = end;
-        paginationTotal.textContent = pagination.total_count;
-
-        // Update page numbers
-        pageNumbers.innerHTML = `Page ${pagination.current_page} of ${pagination.total_pages}`;
-
-        // Update prev/next buttons
-        prevPageBtn.disabled = pagination.current_page <= 1;
-        nextPageBtn.disabled =
-          pagination.current_page >= pagination.total_pages;
-        mobilePrevPageBtn.disabled = pagination.current_page <= 1;
-        mobileNextPageBtn.disabled =
-          pagination.current_page >= pagination.total_pages;
-
-        // Add visual indication for disabled buttons
-        if (prevPageBtn.disabled) {
-          prevPageBtn.classList.add("opacity-50", "cursor-not-allowed");
-        } else {
-          prevPageBtn.classList.remove("opacity-50", "cursor-not-allowed");
-        }
-
-        if (nextPageBtn.disabled) {
-          nextPageBtn.classList.add("opacity-50", "cursor-not-allowed");
-        } else {
-          nextPageBtn.classList.remove("opacity-50", "cursor-not-allowed");
-        }
-
-        if (mobilePrevPageBtn.disabled) {
-          mobilePrevPageBtn.classList.add("opacity-50", "cursor-not-allowed");
-        } else {
-          mobilePrevPageBtn.classList.remove(
-            "opacity-50",
-            "cursor-not-allowed"
-          );
-        }
-
-        if (mobileNextPageBtn.disabled) {
-          mobileNextPageBtn.classList.add("opacity-50", "cursor-not-allowed");
-        } else {
-          mobileNextPageBtn.classList.remove(
-            "opacity-50",
-            "cursor-not-allowed"
-          );
-        }
-      }
+      // We no longer need the updatePaginationUI function as DataTables handles pagination
 
       // Send broadcast
       async function sendBroadcast(broadcastId, broadcastType) {
