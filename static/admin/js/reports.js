@@ -74,7 +74,7 @@ function initializeLogout() {
 // Load broadcasts for the dropdown
 async function loadBroadcasts() {
   try {
-    const response = await fetch("/api/v1/broadcast/list", {
+    const response = await fetch("/api/v1/broadcast", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
