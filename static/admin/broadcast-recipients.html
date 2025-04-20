@@ -535,6 +535,7 @@
           recipientsTable = $("#recipients-table").DataTable({
             data: tableData,
             responsive: true,
+            order: [], // Disable initial sorting to respect backend ordering
             columnDefs: [
               { targets: 2, visible: window.broadcastType === "pecatu" }, // Identifier column
               { targets: 5, orderable: false }, // Action column not sortable

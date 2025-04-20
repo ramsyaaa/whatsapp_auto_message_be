@@ -178,11 +178,11 @@ function initializePeriodButtons() {
 // Initialize date picker
 function initializeDatePicker() {
   const datePicker = document.getElementById("hourly-date-picker");
-  
+
   // Set default date (today)
   const today = new Date();
   datePicker.valueAsDate = today;
-  
+
   // Add event listener
   datePicker.addEventListener("change", (e) => {
     loadHourlyStats(e.target.value);
@@ -272,7 +272,7 @@ async function loadMessageActivity(days = 7) {
           labels: data.data.labels,
           datasets: [
             {
-              label: "Messages Sent",
+              label: "Broadcast Messages Sent",
               data: data.data.data,
               backgroundColor: "rgba(79, 70, 229, 0.2)",
               borderColor: "rgba(79, 70, 229, 1)",
@@ -301,22 +301,14 @@ async function loadMessageActivity(days = 7) {
 
       // Update period buttons
       document.querySelectorAll(".active-period").forEach((btn) => {
-        btn.classList.remove(
-          "active-period",
-          "bg-indigo-600",
-          "text-white"
-        );
+        btn.classList.remove("active-period", "bg-indigo-600", "text-white");
         btn.classList.add("bg-gray-200", "text-gray-700");
       });
 
       const activeBtn = document.getElementById(`last-${days}-days`);
       if (activeBtn) {
         activeBtn.classList.remove("bg-gray-200", "text-gray-700");
-        activeBtn.classList.add(
-          "active-period",
-          "bg-indigo-600",
-          "text-white"
-        );
+        activeBtn.classList.add("active-period", "bg-indigo-600", "text-white");
       }
     }
   } catch (error) {
@@ -416,7 +408,7 @@ async function loadHourlyStats(dateStr = "") {
           labels: data.data.labels,
           datasets: [
             {
-              label: "Messages",
+              label: "Broadcast Messages",
               data: data.data.data,
               backgroundColor: "rgba(59, 130, 246, 0.5)",
               borderColor: "rgba(59, 130, 246, 1)",
@@ -443,8 +435,7 @@ async function loadHourlyStats(dateStr = "") {
       });
 
       // Update date picker value
-      document.getElementById("hourly-date-picker").value =
-        data.data.date;
+      document.getElementById("hourly-date-picker").value = data.data.date;
     }
   } catch (error) {
     console.error("Error loading hourly stats:", error);
@@ -491,21 +482,16 @@ async function loadTopRecipients() {
 // Load recent broadcasts
 async function loadRecentBroadcasts() {
   try {
-    const response = await fetch(
-      "/api/v1/dashboard/recent-broadcasts",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await fetch("/api/v1/dashboard/recent-broadcasts", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     const data = await response.json();
 
     if (data.meta.status === "OK") {
-      const tableBody = document.getElementById(
-        "recent-broadcasts-table"
-      );
+      const tableBody = document.getElementById("recent-broadcasts-table");
 
       if (data.data.length === 0) {
         tableBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No broadcasts available</td></tr>`;

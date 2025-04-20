@@ -130,7 +130,11 @@ func (r *broadcastRepository) GetBroadcastMessage(ctx context.Context, broadcast
 
 func (r *broadcastRepository) GetAllRecipientByBroadcastID(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
 	var recipients []models.BroadcastRecipient
-	err := r.db.WithContext(ctx).Where("broadcast_job_id = ?", broadcastID).Find(&recipients).Error
+	// Order by broadcast_at DESC (newest first), then by status (Success first, then Pending, then Failed)
+	err := r.db.WithContext(ctx).Where("broadcast_job_id = ?", broadcastID).
+		Order("CASE WHEN broadcast_status = 'Success' THEN 0 WHEN broadcast_status = 'Pending' THEN 1 ELSE 2 END").
+		Order("broadcasted_at DESC NULLS LAST").
+		Find(&recipients).Error
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +158,10 @@ func (r *broadcastRepository) GetAllRecipientByBroadcastID(ctx context.Context, 
 
 func (r *broadcastRepository) GetPendingRecipientsByBroadcastID(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
 	var recipients []models.BroadcastRecipient
-	err := r.db.WithContext(ctx).Where("broadcast_job_id = ? AND broadcast_status = ?", broadcastID, "Pending").Find(&recipients).Error
+	// Even though we're only getting Pending status, maintain consistent ordering by broadcasted_at
+	err := r.db.WithContext(ctx).Where("broadcast_job_id = ? AND broadcast_status = ?", broadcastID, "Pending").
+		Order("broadcasted_at DESC NULLS LAST").
+		Find(&recipients).Error
 	if err != nil {
 		return nil, err
 	}
@@ -195,8 +202,11 @@ func (r *broadcastRepository) GetPaginatedRecipientsByBroadcastID(ctx context.Co
 	// Get total count for pagination
 	query.Count(&totalCount)
 
-	// Get paginated results
-	err := query.Offset(offset).Limit(limit).Find(&recipients).Error
+	// Get paginated results with ordering
+	// Order by broadcast_at DESC (newest first), then by status (Success first, then Pending, then Failed)
+	err := query.Order("CASE WHEN broadcast_status = 'Success' THEN 0 WHEN broadcast_status = 'Pending' THEN 1 ELSE 2 END").
+		Order("broadcasted_at DESC NULLS LAST").
+		Offset(offset).Limit(limit).Find(&recipients).Error
 	if err != nil {
 		return nil, err
 	}

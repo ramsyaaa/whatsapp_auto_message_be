@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports - WhatsApp Messaging System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- DataTables CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css"
+    />
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+    <!-- Custom Reports JS -->
+    <script src="/static/admin/js/reports.js"></script>
+    <style>
+      /* Custom styles to make DataTables work with Tailwind */
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_processing,
+      .dataTables_wrapper .dataTables_paginate {
+        color: #4b5563;
+        margin-bottom: 1rem;
+      }
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #4f46e5 !important;
+        color: white !important;
+        border: 1px solid #4f46e5 !important;
+      }
+      .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #e5e7eb !important;
+        color: #1f2937 !important;
+        border: 1px solid #e5e7eb !important;
+      }
+      .dt-buttons {
+        margin-bottom: 1rem;
+      }
+      .dt-button {
+        background-color: #4f46e5 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 0.375rem !important;
+        padding: 0.5rem 1rem !important;
+        font-size: 0.875rem !important;
+        line-height: 1.25rem !important;
+      }
+      .dt-button:hover {
+        background-color: #4338ca !important;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="flex h-screen bg-gray-100">
+      <!-- Sidebar -->
+      <div class="hidden md:flex md:flex-shrink-0">
+        <div class="flex flex-col w-64 bg-gray-800">
+          <div class="flex items-center justify-center h-16 bg-gray-900">
+            <span class="text-white font-bold text-lg">WhatsApp Admin</span>
+          </div>
+          <div class="flex flex-col flex-grow overflow-y-auto">
+            <nav class="flex-1 px-2 py-4 space-y-1">
+              <a
+                href="/admin/dashboard"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                Dashboard
+              </a>
+              <a
+                href="/admin/messaging"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-comment mr-3"></i>
+                Messaging
+              </a>
+              <a
+                href="/admin/broadcast"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-bullhorn mr-3"></i>
+                Broadcast
+              </a>
+              <a
+                href="/admin/reports"
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md"
+              >
+                <i class="fas fa-file-alt mr-3"></i>
+                Reports
+              </a>
+            </nav>
+          </div>
+          <div class="p-4 bg-gray-700">
+            <button
+              id="logout-btn"
+              class="flex items-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+            >
+              <i class="fas fa-sign-out-alt mr-3"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile sidebar -->
+      <div
+        class="md:hidden fixed inset-0 z-40 flex"
+        id="mobile-sidebar"
+        style="display: none"
+      >
+        <div
+          class="fixed inset-0 bg-gray-600 bg-opacity-75"
+          id="sidebar-backdrop"
+        ></div>
+        <div class="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
+          <div class="absolute top-0 right-0 -mr-12 pt-2">
+            <button
+              id="close-sidebar-btn"
+              class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            >
+              <span class="sr-only">Close sidebar</span>
+              <i class="fas fa-times text-white"></i>
+            </button>
+          </div>
+          <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
+            <div class="flex-shrink-0 flex items-center px-4">
+              <span class="text-white font-bold text-lg">WhatsApp Admin</span>
+            </div>
+            <nav class="mt-5 px-2 space-y-1">
+              <a
+                href="/admin/dashboard"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-tachometer-alt mr-3"></i>
+                Dashboard
+              </a>
+              <a
+                href="/admin/messaging"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-comment mr-3"></i>
+                Messaging
+              </a>
+              <a
+                href="/admin/broadcast"
+                class="flex items-center px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white rounded-md"
+              >
+                <i class="fas fa-bullhorn mr-3"></i>
+                Broadcast
+              </a>
+              <a
+                href="/admin/reports"
+                class="flex items-center px-4 py-2 text-sm font-medium text-white bg-gray-700 rounded-md"
+              >
+                <i class="fas fa-file-alt mr-3"></i>
+                Reports
+              </a>
+            </nav>
+          </div>
+          <div class="p-4 bg-gray-700">
+            <button
+              id="mobile-logout-btn"
+              class="flex items-center w-full px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md"
+            >
+              <i class="fas fa-sign-out-alt mr-3"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+        <div class="flex-shrink-0 w-14"></div>
+      </div>
+
+      <!-- Main content -->
+      <div class="flex flex-col flex-1 overflow-hidden">
+        <!-- Top navbar -->
+        <div
+          class="flex items-center justify-between h-16 bg-white shadow-sm px-6"
+        >
+          <button
+            id="open-sidebar-btn"
+            class="md:hidden text-gray-500 focus:outline-none"
+          >
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="flex items-center">
+            <span id="user-name" class="text-sm font-medium text-gray-700 mr-2"
+              >Admin User</span
+            >
+            <div
+              class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center"
+            >
+              <i class="fas fa-user text-gray-600"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main content area -->
+        <main class="flex-1 overflow-y-auto p-6">
+          <div class="mb-6">
+            <h1 class="text-2xl font-semibold text-gray-900">Broadcast Reports</h1>
+            <p class="text-gray-600">
+              Generate detailed reports for broadcast messages
+            </p>
+          </div>
+
+          <!-- Report Generator -->
+          <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">
+              Generate Report
+            </h2>
+            
+            <div class="mb-6">
+              <label for="broadcast-select" class="block text-sm font-medium text-gray-700 mb-2">
+                Select Broadcast
+              </label>
+              <div class="relative">
+                <select
+                  id="broadcast-select"
+                  class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                >
+                  <option value="">Loading broadcasts...</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-6">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Report Type
+              </label>
+              <div class="mt-2 space-y-2">
+                <div class="flex items-center">
+                  <input
+                    id="report-type-summary"
+                    name="report-type"
+                    type="radio"
+                    checked
+                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label for="report-type-summary" class="ml-3 block text-sm font-medium text-gray-700">
+                    Summary Report
+                  </label>
+                </div>
+                <div class="flex items-center">
+                  <input
+                    id="report-type-detailed"
+                    name="report-type"
+                    type="radio"
+                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label for="report-type-detailed" class="ml-3 block text-sm font-medium text-gray-700">
+                    Detailed Report (All Recipients)
+                  </label>
+                </div>
+                <div class="flex items-center">
+                  <input
+                    id="report-type-success"
+                    name="report-type"
+                    type="radio"
+                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label for="report-type-success" class="ml-3 block text-sm font-medium text-gray-700">
+                    Success Report (Only Successful Recipients)
+                  </label>
+                </div>
+                <div class="flex items-center">
+                  <input
+                    id="report-type-failed"
+                    name="report-type"
+                    type="radio"
+                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label for="report-type-failed" class="ml-3 block text-sm font-medium text-gray-700">
+                    Failed Report (Only Failed Recipients)
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button
+                id="generate-report-btn"
+                class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <i class="fas fa-file-export mr-2"></i>
+                Generate Report
+              </button>
+            </div>
+          </div>
+
+          <!-- Report Results -->
+          <div id="report-results" class="bg-white shadow rounded-lg p-6 mb-6 hidden">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-lg font-semibold text-gray-700">
+                Report Results
+              </h2>
+              <div>
+                <span id="broadcast-info" class="text-sm text-gray-500"></span>
+              </div>
+            </div>
+
+            <!-- Summary Section (shown for summary report) -->
+            <div id="summary-section" class="mb-6 hidden">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">Total Recipients</h3>
+                  <p id="summary-total" class="text-2xl font-semibold text-gray-900">--</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">Success Rate</h3>
+                  <p id="summary-success-rate" class="text-2xl font-semibold text-green-600">--</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">Broadcast Date</h3>
+                  <p id="summary-date" class="text-2xl font-semibold text-gray-900">--</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">Successful</h3>
+                  <p id="summary-success" class="text-2xl font-semibold text-green-600">--</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">Failed</h3>
+                  <p id="summary-failed" class="text-2xl font-semibold text-red-600">--</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">Pending</h3>
+                  <p id="summary-pending" class="text-2xl font-semibold text-yellow-600">--</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Report Table -->
+            <div class="overflow-x-auto">
+              <table id="report-table" class="min-w-full divide-y divide-gray-200 stripe hover" style="width: 100%">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      No.
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      WhatsApp Number
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Recipient Name
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Sent At
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Message
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                      No data available
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>
