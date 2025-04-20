@@ -46,6 +46,9 @@ func Route(db *gorm.DB, client *whatsmeow.Client) {
 	app.Get("/admin/broadcast/recipients", func(c *fiber.Ctx) error {
 		return c.SendFile("./static/admin/broadcast-recipients.html")
 	})
+	app.Get("/admin/reports", func(c *fiber.Ctx) error {
+		return c.SendFile("./static/admin/reports.html")
+	})
 
 	// Serve the HTML dashboard on the root path
 	app.Get("/log-viewer", func(c *fiber.Ctx) error {
