@@ -479,8 +479,20 @@ func (h *BroadcastHandler) HandleSendSinglePecatuBroadcast(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(response)
 	}
 
-	recipientName, _ := targetRecipient["recipient_name"].(string)
-	recipientIdentifier, _ := targetRecipient["recipient_unique_identifier"].(string)
+	// Get recipient name and identifier with proper type assertions
+	var recipientName string
+	if nameVal, ok := targetRecipient["recipient_name"]; ok && nameVal != nil {
+		if nameStr, ok := nameVal.(string); ok {
+			recipientName = nameStr
+		}
+	}
+
+	var recipientIdentifier string
+	if idVal, ok := targetRecipient["recipient_unique_identifier"]; ok && idVal != nil {
+		if idStr, ok := idVal.(string); ok {
+			recipientIdentifier = idStr
+		}
+	}
 
 	message, ok := broadcastMessage["broadcast_message"].(string)
 	if !ok || message == "" {
@@ -489,8 +501,11 @@ func (h *BroadcastHandler) HandleSendSinglePecatuBroadcast(c *fiber.Ctx) error {
 	}
 
 	// Replace placeholders in the message
+	// Support both formats: {{name}} and {name}
 	message = strings.Replace(message, "{{name}}", recipientName, -1)
+	message = strings.Replace(message, "{name}", recipientName, -1)
 	message = strings.Replace(message, "{{identifier}}", recipientIdentifier, -1)
+	message = strings.Replace(message, "{identifier}", recipientIdentifier, -1)
 
 	// Send the message using the WhatsApp client
 	recipient, err := types.ParseJID(whatsappNumber + "@s.whatsapp.net")
@@ -498,6 +513,11 @@ func (h *BroadcastHandler) HandleSendSinglePecatuBroadcast(c *fiber.Ctx) error {
 		response := helper.APIResponse("Invalid phone number format", http.StatusBadRequest, "ERROR", nil)
 		return c.Status(http.StatusBadRequest).JSON(response)
 	}
+
+	// Log debug information
+	fmt.Printf("Sending Pecatu message to %s, name: %s, identifier: %s\n", whatsappNumber, recipientName, recipientIdentifier)
+	fmt.Printf("Message template: %s\n", broadcastMessage["broadcast_message"].(string))
+	fmt.Printf("Final message after replacement: %s\n", message)
 
 	// Send the message
 	msg := &waProto.Message{
