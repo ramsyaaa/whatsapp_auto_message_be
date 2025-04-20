@@ -53,6 +53,10 @@ func (s *service) UpdateBroadcastStatus(ctx context.Context, broadcastID int, st
 func (s *service) UpdateRecipientBroadcastStatus(ctx context.Context, recipientID int, broadcastID int, status string) (map[string]interface{}, error) {
 	return s.repo.UpdateRecipientBroadcastStatus(ctx, recipientID, broadcastID, status)
 }
+func (s *service) DeleteRecipient(ctx context.Context, recipientID int) (map[string]interface{}, error) {
+	return s.repo.DeleteRecipient(ctx, recipientID)
+}
+
 func (s *service) IsAnyRecipientInBroadcast(ctx context.Context, broadcastID int) (bool, error) {
 	return s.repo.IsAnyRecipientInBroadcast(ctx, broadcastID)
 }

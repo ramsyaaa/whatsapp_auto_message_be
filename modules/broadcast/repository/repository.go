@@ -15,6 +15,7 @@ type BroadcastRepository interface {
 	GetPaginatedRecipientsByBroadcastID(ctx context.Context, broadcastID int, page int, limit int, search string) (map[string]interface{}, error)
 	UpdateBroadcastStatus(ctx context.Context, broadcastID int, status string) (map[string]interface{}, error)
 	UpdateRecipientBroadcastStatus(ctx context.Context, recipientID int, broadcastID int, status string) (map[string]interface{}, error)
+	DeleteRecipient(ctx context.Context, recipientID int) (map[string]interface{}, error)
 	IsAnyRecipientInBroadcast(ctx context.Context, broadcastID int) (bool, error)
 	GetAllBroadcasts(ctx context.Context) ([]map[string]interface{}, error)
 }

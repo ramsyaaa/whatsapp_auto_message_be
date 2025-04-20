@@ -1812,6 +1812,14 @@
                                     }" class="text-purple-600 hover:text-purple-900">
                                         <i class="fas fa-users"></i> Recipients
                                     </a>
+                                    ${
+                                      broadcast.broadcast_job_status ===
+                                      "Starting"
+                                        ? `<a href="javascript:void(0)" class="text-orange-600 hover:text-orange-900 set-done" data-id="${broadcast.id}">
+                                        <i class="fas fa-check-circle"></i> Set Done
+                                      </a>`
+                                        : ""
+                                    }
                                 </div>
                             </td>
                         `;
@@ -1843,6 +1851,14 @@
                 const broadcastId = link.getAttribute("data-id");
                 const broadcastType = link.getAttribute("data-type");
                 showSendModal(broadcastId, broadcastType);
+              });
+            });
+
+            document.querySelectorAll(".set-done").forEach((link) => {
+              link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const broadcastId = link.getAttribute("data-id");
+                updateBroadcastStatus(broadcastId, "Done", link);
               });
             });
           } catch (error) {
@@ -2702,6 +2718,63 @@
 
         // Load broadcasts when the page loads
         loadBroadcasts();
+
+        // Update broadcast status function
+        async function updateBroadcastStatus(broadcastId, status, link) {
+          // Confirm status update
+          if (
+            !confirm(
+              `Are you sure you want to set this broadcast status to ${status}?`
+            )
+          ) {
+            return;
+          }
+
+          // Show loading state
+          const originalText = link.innerHTML;
+          link.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+          link.classList.add("pointer-events-none");
+
+          try {
+            const response = await fetch("/api/v1/broadcast/update-status", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                broadcast_id: parseInt(broadcastId),
+                status: status,
+              }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success alert
+              alert("Broadcast status updated successfully!");
+
+              // Refresh the broadcast list
+              loadBroadcasts();
+            } else {
+              // Show error alert
+              alert(data.meta?.message || "Failed to update broadcast status");
+
+              // Reset link
+              link.innerHTML = originalText;
+              link.classList.remove("pointer-events-none");
+            }
+          } catch (error) {
+            console.error("Error updating broadcast status:", error);
+
+            // Show error alert
+            alert("An error occurred while updating broadcast status");
+
+            // Reset link
+            link.innerHTML = originalText;
+            link.classList.remove("pointer-events-none");
+          }
+        }
       });
     </script>
   </body>

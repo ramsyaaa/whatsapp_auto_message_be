@@ -294,6 +294,25 @@ func (r *broadcastRepository) IsAnyRecipientInBroadcast(ctx context.Context, bro
 	return count > 0, nil
 }
 
+func (r *broadcastRepository) DeleteRecipient(ctx context.Context, recipientID int) (map[string]interface{}, error) {
+	// Find the recipient first to make sure it exists
+	var recipient models.BroadcastRecipient
+	err := r.db.WithContext(ctx).Where("id = ?", recipientID).First(&recipient).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Delete the recipient
+	err = r.db.WithContext(ctx).Delete(&recipient).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"message": "Recipient deleted successfully",
+	}, nil
+}
+
 func (r *broadcastRepository) GetAllBroadcasts(ctx context.Context) ([]map[string]interface{}, error) {
 	var broadcasts []models.BroadcastJob
 	err := r.db.WithContext(ctx).Order("created_at DESC").Find(&broadcasts).Error

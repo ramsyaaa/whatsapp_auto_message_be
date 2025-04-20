@@ -412,6 +412,60 @@ func (h *BroadcastHandler) HandleSendSingleBroadcast(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(response)
 }
 
+// UpdateBroadcastStatus handles updating the status of a broadcast
+func (h *BroadcastHandler) UpdateBroadcastStatus(c *fiber.Ctx) error {
+	ctx := context.Background()
+
+	// Parse broadcast ID and status from request body
+	var input struct {
+		BroadcastID int    `json:"broadcast_id"`
+		Status      string `json:"status"`
+	}
+
+	if err := c.BodyParser(&input); err != nil {
+		response := helper.APIResponse("Invalid request body", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Validate input
+	if input.BroadcastID <= 0 || input.Status == "" {
+		response := helper.APIResponse("Invalid broadcast ID or status", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Update the broadcast status
+	result, err := h.service.UpdateBroadcastStatus(ctx, input.BroadcastID, input.Status)
+	if err != nil {
+		response := helper.APIResponse("Failed to update broadcast status", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	response := helper.APIResponse("Broadcast status updated successfully", http.StatusOK, "OK", result)
+	return c.Status(http.StatusOK).JSON(response)
+}
+
+// DeleteRecipient handles deleting a recipient
+func (h *BroadcastHandler) DeleteRecipient(c *fiber.Ctx) error {
+	ctx := context.Background()
+
+	// Parse recipient ID from params
+	recipientID, err := strconv.Atoi(c.Params("recipient_id"))
+	if err != nil {
+		response := helper.APIResponse("Invalid recipient ID", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Delete the recipient
+	result, err := h.service.DeleteRecipient(ctx, recipientID)
+	if err != nil {
+		response := helper.APIResponse("Failed to delete recipient", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	response := helper.APIResponse("Recipient deleted successfully", http.StatusOK, "OK", result)
+	return c.Status(http.StatusOK).JSON(response)
+}
+
 // HandleSendSinglePecatuBroadcast handles sending a single Pecatu broadcast message
 func (h *BroadcastHandler) HandleSendSinglePecatuBroadcast(c *fiber.Ctx) error {
 	ctx := context.Background()
