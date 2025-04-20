@@ -193,21 +193,18 @@ async function generateSummaryReport(broadcastId) {
         broadcast.client_info
       } - ${broadcast.broadcast_type === "pecatu" ? "Pecatu" : "Regular"}`;
 
-      // Format date
+      // Format date with Asia/Jakarta timezone (+7)
       const date = new Date(broadcast.created_at);
-      const formattedDate = date.toLocaleDateString("en-US", {
+      const options = {
+        timeZone: "Asia/Jakarta",
         year: "numeric",
         month: "short",
         day: "numeric",
-      });
-
-      // Update summary section
-      document.getElementById("summary-total").textContent =
-        broadcast.total_recipients || 0;
-      document.getElementById("summary-success-rate").textContent = `${(
-        broadcast.success_rate || 0
-      ).toFixed(1)}%`;
-      document.getElementById("summary-date").textContent = formattedDate;
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      };
+      const formattedDate = date.toLocaleString("en-US", options);
 
       // Fetch recipients to get counts by status
       const recipientsResponse = await fetch(
@@ -225,6 +222,7 @@ async function generateSummaryReport(broadcastId) {
         const recipients = recipientsData.data.recipients || [];
 
         // Count by status
+        const totalRecipients = recipients.length;
         const successCount = recipients.filter(
           (r) => r.broadcast_status === "Success"
         ).length;
@@ -235,9 +233,29 @@ async function generateSummaryReport(broadcastId) {
           (r) => r.broadcast_status === "Pending"
         ).length;
 
+        // Calculate success rate
+        const successRate =
+          totalRecipients > 0
+            ? ((successCount / totalRecipients) * 100).toFixed(1)
+            : "0.0";
+
+        // Update summary section
+        document.getElementById("summary-total").textContent = totalRecipients;
+        document.getElementById(
+          "summary-success-rate"
+        ).textContent = `${successRate}%`;
+        document.getElementById("summary-date").textContent = formattedDate;
         document.getElementById("summary-success").textContent = successCount;
         document.getElementById("summary-failed").textContent = failedCount;
         document.getElementById("summary-pending").textContent = pendingCount;
+      } else {
+        // Update summary section with default values
+        document.getElementById("summary-total").textContent = 0;
+        document.getElementById("summary-success-rate").textContent = "0.0%";
+        document.getElementById("summary-date").textContent = formattedDate;
+        document.getElementById("summary-success").textContent = 0;
+        document.getElementById("summary-failed").textContent = 0;
+        document.getElementById("summary-pending").textContent = 0;
       }
 
       // Generate detailed report table
@@ -321,12 +339,20 @@ async function generateDetailedReport(
         // Format broadcast_at date if available
         let broadcastAtText = "-";
         if (recipient.broadcast_at) {
+          // Convert to Asia/Jakarta timezone (+7)
           const date = new Date(recipient.broadcast_at);
-          broadcastAtText = date.toLocaleString();
+          const options = {
+            timeZone: "Asia/Jakarta",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          };
+          broadcastAtText = date.toLocaleString("en-US", options);
         }
-
-        // Get message content
-        const messageContent = broadcastData.data.broadcast_message || "-";
 
         return [
           index + 1, // Row number
@@ -336,7 +362,6 @@ async function generateDetailedReport(
             recipient.broadcast_status || "Pending"
           }</span>`,
           broadcastAtText,
-          messageContent,
         ];
       });
 
@@ -363,7 +388,12 @@ async function generateDetailedReport(
             text: '<i class="fas fa-file-excel mr-1"></i> Export to Excel',
             title: `${
               broadcastData.data.client_info
-            } - ${reportTitle} - ${new Date().toLocaleDateString()}`,
+            } - ${reportTitle} - ${new Date().toLocaleString("en-US", {
+              timeZone: "Asia/Jakarta",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}`,
             className: "export-excel-button",
           },
           {
@@ -371,7 +401,12 @@ async function generateDetailedReport(
             text: '<i class="fas fa-file-csv mr-1"></i> Export to CSV',
             title: `${
               broadcastData.data.client_info
-            } - ${reportTitle} - ${new Date().toLocaleDateString()}`,
+            } - ${reportTitle} - ${new Date().toLocaleString("en-US", {
+              timeZone: "Asia/Jakarta",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}`,
             className: "export-csv-button",
           },
           {
@@ -379,7 +414,12 @@ async function generateDetailedReport(
             text: '<i class="fas fa-print mr-1"></i> Print',
             title: `${
               broadcastData.data.client_info
-            } - ${reportTitle} - ${new Date().toLocaleDateString()}`,
+            } - ${reportTitle} - ${new Date().toLocaleString("en-US", {
+              timeZone: "Asia/Jakarta",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })}`,
             className: "print-button",
           },
         ],

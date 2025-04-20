@@ -214,7 +214,9 @@
         <!-- Main content area -->
         <main class="flex-1 overflow-y-auto p-6">
           <div class="mb-6">
-            <h1 class="text-2xl font-semibold text-gray-900">Broadcast Reports</h1>
+            <h1 class="text-2xl font-semibold text-gray-900">
+              Broadcast Reports
+            </h1>
             <p class="text-gray-600">
               Generate detailed reports for broadcast messages
             </p>
@@ -225,9 +227,12 @@
             <h2 class="text-lg font-semibold text-gray-700 mb-4">
               Generate Report
             </h2>
-            
+
             <div class="mb-6">
-              <label for="broadcast-select" class="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                for="broadcast-select"
+                class="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Select Broadcast
               </label>
               <div class="relative">
@@ -253,7 +258,10 @@
                     checked
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                   />
-                  <label for="report-type-summary" class="ml-3 block text-sm font-medium text-gray-700">
+                  <label
+                    for="report-type-summary"
+                    class="ml-3 block text-sm font-medium text-gray-700"
+                  >
                     Summary Report
                   </label>
                 </div>
@@ -264,7 +272,10 @@
                     type="radio"
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                   />
-                  <label for="report-type-detailed" class="ml-3 block text-sm font-medium text-gray-700">
+                  <label
+                    for="report-type-detailed"
+                    class="ml-3 block text-sm font-medium text-gray-700"
+                  >
                     Detailed Report (All Recipients)
                   </label>
                 </div>
@@ -275,7 +286,10 @@
                     type="radio"
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                   />
-                  <label for="report-type-success" class="ml-3 block text-sm font-medium text-gray-700">
+                  <label
+                    for="report-type-success"
+                    class="ml-3 block text-sm font-medium text-gray-700"
+                  >
                     Success Report (Only Successful Recipients)
                   </label>
                 </div>
@@ -286,7 +300,10 @@
                     type="radio"
                     class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                   />
-                  <label for="report-type-failed" class="ml-3 block text-sm font-medium text-gray-700">
+                  <label
+                    for="report-type-failed"
+                    class="ml-3 block text-sm font-medium text-gray-700"
+                  >
                     Failed Report (Only Failed Recipients)
                   </label>
                 </div>
@@ -305,7 +322,10 @@
           </div>
 
           <!-- Report Results -->
-          <div id="report-results" class="bg-white shadow rounded-lg p-6 mb-6 hidden">
+          <div
+            id="report-results"
+            class="bg-white shadow rounded-lg p-6 mb-6 hidden"
+          >
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-lg font-semibold text-gray-700">
                 Report Results
@@ -319,63 +339,117 @@
             <div id="summary-section" class="mb-6 hidden">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="text-sm font-medium text-gray-500 mb-1">Total Recipients</h3>
-                  <p id="summary-total" class="text-2xl font-semibold text-gray-900">--</p>
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">
+                    Total Recipients
+                  </h3>
+                  <p
+                    id="summary-total"
+                    class="text-2xl font-semibold text-gray-900"
+                  >
+                    --
+                  </p>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="text-sm font-medium text-gray-500 mb-1">Success Rate</h3>
-                  <p id="summary-success-rate" class="text-2xl font-semibold text-green-600">--</p>
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">
+                    Success Rate
+                  </h3>
+                  <p
+                    id="summary-success-rate"
+                    class="text-2xl font-semibold text-green-600"
+                  >
+                    --
+                  </p>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="text-sm font-medium text-gray-500 mb-1">Broadcast Date</h3>
-                  <p id="summary-date" class="text-2xl font-semibold text-gray-900">--</p>
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">
+                    Broadcast Date
+                  </h3>
+                  <p
+                    id="summary-date"
+                    class="text-2xl font-semibold text-gray-900"
+                  >
+                    --
+                  </p>
                 </div>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="text-sm font-medium text-gray-500 mb-1">Successful</h3>
-                  <p id="summary-success" class="text-2xl font-semibold text-green-600">--</p>
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">
+                    Successful
+                  </h3>
+                  <p
+                    id="summary-success"
+                    class="text-2xl font-semibold text-green-600"
+                  >
+                    --
+                  </p>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-4">
                   <h3 class="text-sm font-medium text-gray-500 mb-1">Failed</h3>
-                  <p id="summary-failed" class="text-2xl font-semibold text-red-600">--</p>
+                  <p
+                    id="summary-failed"
+                    class="text-2xl font-semibold text-red-600"
+                  >
+                    --
+                  </p>
                 </div>
                 <div class="bg-gray-50 rounded-lg p-4">
-                  <h3 class="text-sm font-medium text-gray-500 mb-1">Pending</h3>
-                  <p id="summary-pending" class="text-2xl font-semibold text-yellow-600">--</p>
+                  <h3 class="text-sm font-medium text-gray-500 mb-1">
+                    Pending
+                  </h3>
+                  <p
+                    id="summary-pending"
+                    class="text-2xl font-semibold text-yellow-600"
+                  >
+                    --
+                  </p>
                 </div>
               </div>
             </div>
 
             <!-- Report Table -->
             <div class="overflow-x-auto">
-              <table id="report-table" class="min-w-full divide-y divide-gray-200 stripe hover" style="width: 100%">
+              <table
+                id="report-table"
+                class="min-w-full divide-y divide-gray-200 stripe hover"
+                style="width: 100%"
+              >
                 <thead class="bg-gray-50">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       No.
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       WhatsApp Number
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Recipient Name
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Status
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Sent At
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Message
                     </th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
+                    <td
+                      colspan="5"
+                      class="px-6 py-4 text-center text-sm text-gray-500"
+                    >
                       No data available
                     </td>
                   </tr>

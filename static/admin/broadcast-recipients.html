@@ -508,6 +508,19 @@
             if (recipient.broadcast_status === "Success") {
               actionContent = `<span class="text-green-600"><i class="fas fa-check"></i> Sent</span>`;
             } else {
+              // Show send buttons for all non-success statuses
+              let deleteButton = "";
+
+              // Only show delete button for Failed or Pending statuses
+              if (
+                recipient.broadcast_status === "Failed" ||
+                recipient.broadcast_status === "Pending"
+              ) {
+                deleteButton = `<button class="text-red-600 hover:text-red-900 delete-recipient" data-id="${recipient.id}" data-broadcast-id="${broadcastId}">
+                  <i class="fas fa-trash"></i> Delete
+                </button>`;
+              }
+
               actionContent = `<div class="flex space-x-2">
                 <button class="text-indigo-600 hover:text-indigo-900 send-single" data-id="${recipient.id}" data-broadcast-id="${broadcastId}" data-type="regular">
                   <i class="fas fa-paper-plane"></i> Regular
@@ -515,9 +528,7 @@
                 <button class="text-purple-600 hover:text-purple-900 send-single" data-id="${recipient.id}" data-broadcast-id="${broadcastId}" data-type="pecatu">
                   <i class="fas fa-paper-plane"></i> Pecatu
                 </button>
-                <button class="text-red-600 hover:text-red-900 delete-recipient" data-id="${recipient.id}" data-broadcast-id="${broadcastId}">
-                  <i class="fas fa-trash"></i> Delete
-                </button>
+                ${deleteButton}
               </div>`;
             }
 
