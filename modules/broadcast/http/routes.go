@@ -13,6 +13,7 @@ func BroadcastRoutes(app *fiber.App, handler *BroadcastHandler) {
 	app.Get("/broadcast/list", handler.GetAllBroadcasts)
 	app.Get("/broadcast/recipients/:broadcast_id", handler.GetAllRecipientByBroadcastID)
 	app.Delete("/broadcast/recipient/:recipient_id", handler.DeleteRecipient) // Added for deleting recipients
+	app.Delete("/broadcast/:broadcast_id", handler.DeleteBroadcast)           // Added for deleting broadcasts
 	app.Post("/broadcast/update-status", handler.UpdateBroadcastStatus)       // Added for updating broadcast status
 	app.Post("/broadcast/send", handler.HandleSendBroadcast)
 	app.Post("/broadcast/pecatu/send", handler.HandlePecatuBroadcast)

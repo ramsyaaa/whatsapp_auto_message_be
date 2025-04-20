@@ -1820,6 +1820,11 @@
                                       </a>`
                                         : ""
                                     }
+                                    <a href="javascript:void(0)" class="text-red-600 hover:text-red-900 delete-broadcast" data-id="${
+                                      broadcast.id
+                                    }" data-client="${broadcast.client_info}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
                                 </div>
                             </td>
                         `;
@@ -1859,6 +1864,15 @@
                 e.preventDefault();
                 const broadcastId = link.getAttribute("data-id");
                 updateBroadcastStatus(broadcastId, "Done", link);
+              });
+            });
+
+            document.querySelectorAll(".delete-broadcast").forEach((link) => {
+              link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const broadcastId = link.getAttribute("data-id");
+                const clientInfo = link.getAttribute("data-client");
+                deleteBroadcast(broadcastId, clientInfo, link);
               });
             });
           } catch (error) {
@@ -2769,6 +2783,58 @@
 
             // Show error alert
             alert("An error occurred while updating broadcast status");
+
+            // Reset link
+            link.innerHTML = originalText;
+            link.classList.remove("pointer-events-none");
+          }
+        }
+
+        // Delete broadcast function
+        async function deleteBroadcast(broadcastId, clientInfo, link) {
+          // Confirm deletion
+          if (
+            !confirm(
+              `Are you sure you want to delete the broadcast for ${clientInfo}? This will also delete all recipients associated with this broadcast.`
+            )
+          ) {
+            return;
+          }
+
+          // Show loading state
+          const originalText = link.innerHTML;
+          link.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+          link.classList.add("pointer-events-none");
+
+          try {
+            const response = await fetch(`/api/v1/broadcast/${broadcastId}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+              // Show success alert
+              alert("Broadcast deleted successfully!");
+
+              // Refresh the broadcast list
+              loadBroadcasts();
+            } else {
+              // Show error alert
+              alert(data.meta?.message || "Failed to delete broadcast");
+
+              // Reset link
+              link.innerHTML = originalText;
+              link.classList.remove("pointer-events-none");
+            }
+          } catch (error) {
+            console.error("Error deleting broadcast:", error);
+
+            // Show error alert
+            alert("An error occurred while deleting the broadcast");
 
             // Reset link
             link.innerHTML = originalText;

@@ -57,6 +57,10 @@ func (s *service) DeleteRecipient(ctx context.Context, recipientID int) (map[str
 	return s.repo.DeleteRecipient(ctx, recipientID)
 }
 
+func (s *service) DeleteBroadcast(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
+	return s.repo.DeleteBroadcast(ctx, broadcastID)
+}
+
 func (s *service) IsAnyRecipientInBroadcast(ctx context.Context, broadcastID int) (bool, error) {
 	return s.repo.IsAnyRecipientInBroadcast(ctx, broadcastID)
 }

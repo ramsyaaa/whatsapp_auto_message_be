@@ -466,6 +466,28 @@ func (h *BroadcastHandler) DeleteRecipient(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(response)
 }
 
+// DeleteBroadcast handles deleting a broadcast and all its recipients
+func (h *BroadcastHandler) DeleteBroadcast(c *fiber.Ctx) error {
+	ctx := context.Background()
+
+	// Parse broadcast ID from params
+	broadcastID, err := strconv.Atoi(c.Params("broadcast_id"))
+	if err != nil {
+		response := helper.APIResponse("Invalid broadcast ID", http.StatusBadRequest, "ERROR", nil)
+		return c.Status(http.StatusBadRequest).JSON(response)
+	}
+
+	// Delete the broadcast and all its recipients
+	result, err := h.service.DeleteBroadcast(ctx, broadcastID)
+	if err != nil {
+		response := helper.APIResponse("Failed to delete broadcast", http.StatusInternalServerError, "ERROR", nil)
+		return c.Status(http.StatusInternalServerError).JSON(response)
+	}
+
+	response := helper.APIResponse("Broadcast deleted successfully", http.StatusOK, "OK", result)
+	return c.Status(http.StatusOK).JSON(response)
+}
+
 // HandleSendSinglePecatuBroadcast handles sending a single Pecatu broadcast message
 func (h *BroadcastHandler) HandleSendSinglePecatuBroadcast(c *fiber.Ctx) error {
 	ctx := context.Background()

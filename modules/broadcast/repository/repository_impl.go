@@ -313,6 +313,41 @@ func (r *broadcastRepository) DeleteRecipient(ctx context.Context, recipientID i
 	}, nil
 }
 
+func (r *broadcastRepository) DeleteBroadcast(ctx context.Context, broadcastID int) (map[string]interface{}, error) {
+	// Start a transaction
+	tx := r.db.WithContext(ctx).Begin()
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	// Delete all recipients associated with the broadcast
+	if err := tx.Where("broadcast_job_id = ?", broadcastID).Delete(&models.BroadcastRecipient{}).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Delete the broadcast
+	var broadcast models.BroadcastJob
+	if err := tx.Where("id = ?", broadcastID).First(&broadcast).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Delete(&broadcast).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Commit the transaction
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"message": "Broadcast and all its recipients deleted successfully",
+	}, nil
+}
+
 func (r *broadcastRepository) GetAllBroadcasts(ctx context.Context) ([]map[string]interface{}, error) {
 	var broadcasts []models.BroadcastJob
 	err := r.db.WithContext(ctx).Order("created_at DESC").Find(&broadcasts).Error

@@ -206,49 +206,69 @@ async function generateSummaryReport(broadcastId) {
       };
       const formattedDate = date.toLocaleString("en-US", options);
 
-      // Fetch recipients to get counts by status
-      const recipientsResponse = await fetch(
-        `/api/v1/broadcast/recipients/${broadcastId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      try {
+        // Fetch recipients to get counts by status
+        const recipientsResponse = await fetch(
+          `/api/v1/broadcast/recipients/${broadcastId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const recipientsData = await recipientsResponse.json();
+
+        if (recipientsData.meta.status === "OK") {
+          const recipients = recipientsData.data.recipients || [];
+
+          // Count by status
+          const totalRecipients = recipients.length;
+          const successCount = recipients.filter(
+            (r) => r.broadcast_status === "Success"
+          ).length;
+          const failedCount = recipients.filter(
+            (r) => r.broadcast_status === "Failed"
+          ).length;
+          const pendingCount = recipients.filter(
+            (r) => r.broadcast_status === "Pending"
+          ).length;
+
+          // Calculate success rate
+          const successRate =
+            totalRecipients > 0
+              ? ((successCount / totalRecipients) * 100).toFixed(1)
+              : "0.0";
+
+          console.log("Report data:", {
+            totalRecipients,
+            successCount,
+            failedCount,
+            pendingCount,
+            successRate,
+          });
+
+          // Update summary section
+          document.getElementById("summary-total").textContent =
+            totalRecipients;
+          document.getElementById(
+            "summary-success-rate"
+          ).textContent = `${successRate}%`;
+          document.getElementById("summary-date").textContent = formattedDate;
+          document.getElementById("summary-success").textContent = successCount;
+          document.getElementById("summary-failed").textContent = failedCount;
+          document.getElementById("summary-pending").textContent = pendingCount;
+        } else {
+          // Update summary section with default values
+          document.getElementById("summary-total").textContent = 0;
+          document.getElementById("summary-success-rate").textContent = "0.0%";
+          document.getElementById("summary-date").textContent = formattedDate;
+          document.getElementById("summary-success").textContent = 0;
+          document.getElementById("summary-failed").textContent = 0;
+          document.getElementById("summary-pending").textContent = 0;
         }
-      );
-
-      const recipientsData = await recipientsResponse.json();
-
-      if (recipientsData.meta.status === "OK") {
-        const recipients = recipientsData.data.recipients || [];
-
-        // Count by status
-        const totalRecipients = recipients.length;
-        const successCount = recipients.filter(
-          (r) => r.broadcast_status === "Success"
-        ).length;
-        const failedCount = recipients.filter(
-          (r) => r.broadcast_status === "Failed"
-        ).length;
-        const pendingCount = recipients.filter(
-          (r) => r.broadcast_status === "Pending"
-        ).length;
-
-        // Calculate success rate
-        const successRate =
-          totalRecipients > 0
-            ? ((successCount / totalRecipients) * 100).toFixed(1)
-            : "0.0";
-
-        // Update summary section
-        document.getElementById("summary-total").textContent = totalRecipients;
-        document.getElementById(
-          "summary-success-rate"
-        ).textContent = `${successRate}%`;
-        document.getElementById("summary-date").textContent = formattedDate;
-        document.getElementById("summary-success").textContent = successCount;
-        document.getElementById("summary-failed").textContent = failedCount;
-        document.getElementById("summary-pending").textContent = pendingCount;
-      } else {
+      } catch (error) {
+        console.error("Error fetching recipients for summary:", error);
         // Update summary section with default values
         document.getElementById("summary-total").textContent = 0;
         document.getElementById("summary-success-rate").textContent = "0.0%";
