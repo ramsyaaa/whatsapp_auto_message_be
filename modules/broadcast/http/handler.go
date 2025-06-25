@@ -954,7 +954,7 @@ func (h *BroadcastHandler) HandlePecatuBroadcast(c *fiber.Ctx) error {
 			}
 
 			// Delay between sending messages
-			time.Sleep(5 * time.Second)
+			time.Sleep(20 * time.Second)
 		}
 
 		// Close the channel once all processing is done
